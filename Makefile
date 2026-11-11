@@ -33,6 +33,10 @@ asan: $(SRC)
 	$(CC) $(CFLAGS) -fsanitize=address,undefined -o $(ASAN_TARGET) $(SRC) $(LDLIBS)
 
 clean:
+ifeq ($(OS),Windows_NT)
+	-cmd /c "del /q $(TARGET) $(ASAN_TARGET) *.o common\*.o 2>nul"
+else
 	rm -f $(TARGET) $(ASAN_TARGET) *.o common/*.o
+endif
 
 
