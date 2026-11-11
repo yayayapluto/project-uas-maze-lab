@@ -19,6 +19,11 @@ HDR     := common/common.h maze_core/maze_core.h maze_catalog/maze_catalog.h \
 TARGET  := maze_lab
 ASAN_TARGET := maze_lab_asan
 
+ifeq ($(OS),Windows_NT)
+TARGET     := maze_lab.exe
+ASAN_TARGET := maze_lab_asan.exe
+endif
+
 .PHONY: all test asan clean
 
 all: $(TARGET)
@@ -27,7 +32,11 @@ $(TARGET): $(SRC) $(HDR)
 	$(CC) $(CFLAGS) -o $@ $(SRC) $(LDLIBS)
 
 test: $(TARGET)
+ifeq ($(OS),Windows_NT)
+	$(TARGET) --test
+else
 	./$(TARGET) --test
+endif
 
 asan: $(SRC)
 	$(CC) $(CFLAGS) -fsanitize=address,undefined -o $(ASAN_TARGET) $(SRC) $(LDLIBS)
