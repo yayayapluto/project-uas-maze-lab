@@ -1,7 +1,7 @@
 #ifndef MAZE_BENCH_H
 #define MAZE_BENCH_H
 
-#include "maze_core.h"
+#include "../maze_core/maze_core.h"
 
 /* Satu baris hasil benchmark untuk kombinasi generator dan solver. */
 typedef struct {

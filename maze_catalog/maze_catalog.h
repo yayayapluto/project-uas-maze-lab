@@ -1,7 +1,7 @@
 #ifndef MAZE_CATALOG_H
 #define MAZE_CATALOG_H
 
-#include "maze_core.h"
+#include "../maze_core/maze_core.h"
 
 /* Satu entri katalog: identitas labirin dan berkas tempatnya disimpan. */
 typedef struct {

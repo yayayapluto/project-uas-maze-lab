@@ -1,9 +1,9 @@
 #ifndef MAZE_LAB_H
 #define MAZE_LAB_H
 
-#include "maze_bench.h"
-#include "maze_catalog.h"
-#include "maze_core.h"
+#include "../maze_bench/maze_bench.h"
+#include "../maze_catalog/maze_catalog.h"
+#include "../maze_core/maze_core.h"
 
 /* Menjalankan menu utama Maze Lab sampai pengguna memilih keluar. */
 void run_maze_lab(void);

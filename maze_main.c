@@ -1,4 +1,4 @@
-#include "maze_lab.h"
+#include "maze_lab/maze_lab.h"
 
 #include <stdio.h>
 #include <string.h>

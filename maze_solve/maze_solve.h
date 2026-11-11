@@ -1,7 +1,7 @@
 #ifndef MAZE_SOLVE_H
 #define MAZE_SOLVE_H
 
-#include "maze_core.h"
+#include "../maze_core/maze_core.h"
 
 /* Mencari jalur dengan DFS rekursif; jalur dilepas pemanggil dengan util_free. */
 Status maze_solve_dfs(const Maze *m, MazeSolveResult *res, MazeCell **path);

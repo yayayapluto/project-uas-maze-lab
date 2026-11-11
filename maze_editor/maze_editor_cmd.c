@@ -1,6 +1,6 @@
 #include "maze_editor_cmd.h"
 
-#include "maze_solve.h"
+#include "../maze_solve/maze_solve.h"
 
 #include <stdio.h>
 #include <stdlib.h>

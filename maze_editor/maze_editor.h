@@ -1,7 +1,7 @@
 #ifndef MAZE_EDITOR_H
 #define MAZE_EDITOR_H
 
-#include "maze_core.h"
+#include "../maze_core/maze_core.h"
 
 #define UNDO_WALL 0
 #define UNDO_OPEN 1

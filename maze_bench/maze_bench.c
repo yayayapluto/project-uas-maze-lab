@@ -1,7 +1,7 @@
 #include "maze_bench.h"
 
-#include "maze_gen.h"
-#include "maze_solve.h"
+#include "../maze_gen/maze_gen.h"
+#include "../maze_solve/maze_solve.h"
 
 #include <stdlib.h>
 #include <string.h>

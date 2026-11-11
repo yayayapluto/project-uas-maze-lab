@@ -1,8 +1,8 @@
-#include "maze_lab.h"
+#include "../maze_lab/maze_lab.h"
 
-#include "maze_editor.h"
-#include "maze_gen.h"
-#include "maze_solve.h"
+#include "../maze_editor/maze_editor.h"
+#include "../maze_gen/maze_gen.h"
+#include "../maze_solve/maze_solve.h"
 #include "maze_test.h"
 
 #include <stdio.h>

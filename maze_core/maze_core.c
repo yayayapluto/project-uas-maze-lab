@@ -120,7 +120,7 @@ Status maze_create(Maze *m, int h, int w)
         return ST_NO_MEMORY;
     }
     for (r = 0; r < h; r++) {
-        rows[r] = (char *)util_calloc((size_t)w, sizeof(char));
+        rows[r] = (char *)util_calloc((size_t)w + 1, sizeof(char));
         if (rows[r] == NULL) {
             for (i = 0; i < r; i++) {
                 util_free(rows[i]);
@@ -129,6 +129,7 @@ Status maze_create(Maze *m, int h, int w)
             return ST_NO_MEMORY;
         }
         memset(rows[r], '#', (size_t)w);
+        rows[r][w] = '\0';
     }
     m->grid = rows;
     m->h = h;

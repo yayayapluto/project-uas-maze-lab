@@ -1,7 +1,7 @@
 #ifndef MAZE_CORE_H
 #define MAZE_CORE_H
 
-#include "common/common.h"
+#include "../common/common.h"
 
 /* Satu sel labirin dengan koordinat baris dan kolom berbasis nol. */
 typedef struct {
