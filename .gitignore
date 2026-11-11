@@ -1,0 +1,9 @@
+# Build output
+*.o
+*.exe
+/maze_lab
+/maze_lab_asan
+/build/
+
+# Berkas sementara pengujian
+data/tmp_*
