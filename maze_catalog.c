@@ -110,12 +110,46 @@ static Status grow_catalog(MazeCatalog *cat)
     return ST_OK;
 }
 
+/* Mengambil baris berikutnya dari buffer; mengembalikan 1 bila ada baris. */
+static int next_line(char **cur, char **line_out)
+{
+    char *line = *cur;
+    char *nl = strchr(line, '\n');
+
+    if (nl != NULL) {
+        *nl = '\0';
+        *cur = nl + 1;
+    } else {
+        if (line[0] == '\0') {
+            return 0;
+        }
+        *cur = line + strlen(line);
+    }
+    line[strcspn(line, "\r")] = '\0';
+    *line_out = line;
+    return 1;
+}
+
+/* Menambahkan satu entri ke array katalog dan memperbesar bila perlu. */
+static Status append_info(MazeCatalog *cat, const MazeInfo *info)
+{
+    if (cat->count == cat->capacity) {
+        Status st = grow_catalog(cat);
+        if (st != ST_OK) {
+            return st;
+        }
+    }
+    cat->items[cat->count++] = *info;
+    return ST_OK;
+}
+
 /* Memuat katalog dari berkas; baris rusak tidak menghentikan pemuatan. */
 Status maze_catalog_load(const char *path, MazeCatalog *cat, int *bad_lines)
 {
     char *data = NULL;
     size_t len = 0;
     char *cur;
+    char *line;
     Status st;
     int bad = 0;
 
@@ -127,41 +161,20 @@ Status maze_catalog_load(const char *path, MazeCatalog *cat, int *bad_lines)
         return st;
     }
     cur = data;
-    for (;;) {
-        char *nl = strchr(cur, '\n');
-        char *line = cur;
+    while (next_line(&cur, &line)) {
         MazeInfo info;
-        if (nl != NULL) {
-            *nl = '\0';
-            cur = nl + 1;
-        } else {
-            cur = line + strlen(line);
-        }
-        line[strcspn(line, "\r")] = '\0';
         if (line[0] == '\0') {
-            if (nl == NULL) {
-                break;
-            }
             continue;
         }
         if (!parse_line(line, &info)) {
             bad++;
-            if (nl == NULL) {
-                break;
-            }
             continue;
         }
-        if (cat->count == cat->capacity) {
-            st = grow_catalog(cat);
-            if (st != ST_OK) {
-                util_free(data);
-                maze_catalog_free(cat);
-                return st;
-            }
-        }
-        cat->items[cat->count++] = info;
-        if (nl == NULL) {
-            break;
+        st = append_info(cat, &info);
+        if (st != ST_OK) {
+            util_free(data);
+            maze_catalog_free(cat);
+            return st;
         }
     }
     util_free(data);

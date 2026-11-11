@@ -202,59 +202,94 @@ void maze_print(const Maze *m)
 }
 
 /* Memuat labirin dari berkas; pemeriksaan menyalin baris yang sudah valid. */
-static Status load_rows(char *cur, int h, int w, char ***rows_out)
+static Status load_rows(char **cur, int h, int w, char ***rows_out)
 {
     char **rows = (char **)util_calloc((size_t)h, sizeof(char *));
     int filled = 0;
     int r;
     int c;
+    Status st = ST_OK;
 
     if (rows == NULL) {
         return ST_NO_MEMORY;
     }
-    for (r = 0; r < h; r++) {
-        char *line = take_line(&cur);
+    for (r = 0; r < h && st == ST_OK; r++) {
+        char *line = take_line(cur);
         if (line == NULL || (int)strlen(line) != w) {
-            goto bad_format;
+            st = ST_BAD_FORMAT;
+            break;
         }
         for (c = 0; c < w; c++) {
             if (!valid_cell_char(line[c])) {
-                goto bad_format;
+                st = ST_BAD_FORMAT;
+                break;
             }
+        }
+        if (st != ST_OK) {
+            break;
         }
         rows[r] = (char *)util_calloc((size_t)w + 1, sizeof(char));
         if (rows[r] == NULL) {
-            for (c = 0; c < filled; c++) {
-                util_free(rows[c]);
-            }
-            util_free(rows);
-            return ST_NO_MEMORY;
+            st = ST_NO_MEMORY;
+            break;
         }
         memcpy(rows[r], line, (size_t)w);
         rows[r][w] = '\0';
         filled++;
     }
+    if (st != ST_OK) {
+        for (c = 0; c < filled; c++) {
+            util_free(rows[c]);
+        }
+        util_free(rows);
+        return st;
+    }
     *rows_out = rows;
     return ST_OK;
-
-bad_format:
-    for (c = 0; c < filled; c++) {
-        util_free(rows[c]);
-    }
-    util_free(rows);
-    return ST_BAD_FORMAT;
 }
 
-/* Memuat labirin dari berkas teks dan menggantinya hanya bila seluruhnya valid. */
-Status maze_load(const char *path, Maze *out)
+/* Melepas array baris hasil pembacaan berkas. */
+static void free_rows(char **rows, int h)
 {
-    char *data = NULL;
-    size_t len = 0;
-    char *cur;
-    char *header;
-    char **rows = NULL;
-    int h = 0;
-    int w = 0;
+    int r;
+
+    for (r = 0; r < h; r++) {
+        util_free(rows[r]);
+    }
+    util_free(rows);
+}
+
+/* Membaca header dimensi dan memeriksa rentangnya. */
+static Status read_header(char **cur, int *h, int *w)
+{
+    char *header = take_line(cur);
+
+    if (header == NULL || parse_two_ints(header, h, w) != ST_OK) {
+        return ST_BAD_FORMAT;
+    }
+    if (*h < 5 || *h > 61 || *w < 5 || *w > 61) {
+        return ST_BAD_FORMAT;
+    }
+    return ST_OK;
+}
+
+/* Menyatakan sisa isi berkas hanya berisi baris kosong. */
+static int only_blank_lines(char *cur)
+{
+    for (;;) {
+        char *rest = take_line(&cur);
+        if (rest == NULL) {
+            return 1;
+        }
+        if (rest[0] != '\0') {
+            return 0;
+        }
+    }
+}
+
+/* Membangun labirin dari baris yang sudah valid dan melepas baris tersebut. */
+static Status build_maze(char **rows, int h, int w, Maze *out)
+{
     int n_s = 0;
     int n_e = 0;
     int r;
@@ -262,59 +297,15 @@ Status maze_load(const char *path, Maze *out)
     Maze tmp;
     Status st;
 
-    if (path == NULL || out == NULL) {
-        return ST_BAD_INPUT;
-    }
-    st = util_read_file(path, &data, &len);
-    if (st != ST_OK) {
-        return st;
-    }
-    cur = data;
-    header = take_line(&cur);
-    if (header == NULL || parse_two_ints(header, &h, &w) != ST_OK) {
-        util_free(data);
-        return ST_BAD_FORMAT;
-    }
-    if (h < 5 || h > 61 || w < 5 || w > 61) {
-        util_free(data);
-        return ST_BAD_FORMAT;
-    }
-    st = load_rows(cur, h, w, &rows);
-    if (st != ST_OK) {
-        util_free(data);
-        return st;
-    }
-    for (;;) {
-        char *rest = take_line(&cur);
-        if (rest == NULL) {
-            break;
-        }
-        if (rest[0] != '\0') {
-            for (r = 0; r < h; r++) {
-                util_free(rows[r]);
-            }
-            util_free(rows);
-            util_free(data);
-            return ST_BAD_FORMAT;
-        }
-    }
     count_markers((const char **)rows, h, w, &n_s, &n_e);
     if (n_s != 1 || n_e != 1 || !border_ok((const char **)rows, h, w)) {
-        for (r = 0; r < h; r++) {
-            util_free(rows[r]);
-        }
-        util_free(rows);
-        util_free(data);
+        free_rows(rows, h);
         return ST_BAD_FORMAT;
     }
     memset(&tmp, 0, sizeof tmp);
     st = maze_create(&tmp, h, w);
     if (st != ST_OK) {
-        for (r = 0; r < h; r++) {
-            util_free(rows[r]);
-        }
-        util_free(rows);
-        util_free(data);
+        free_rows(rows, h);
         return st;
     }
     for (r = 0; r < h; r++) {
@@ -329,10 +320,48 @@ Status maze_load(const char *path, Maze *out)
                 tmp.end.c = c;
             }
         }
-        util_free(rows[r]);
     }
-    util_free(rows);
+    free_rows(rows, h);
+    *out = tmp;
+    return ST_OK;
+}
+
+/* Memuat labirin dari berkas teks dan menggantinya hanya bila seluruhnya valid. */
+Status maze_load(const char *path, Maze *out)
+{
+    char *data = NULL;
+    size_t len = 0;
+    char *cur;
+    char **rows = NULL;
+    int h = 0;
+    int w = 0;
+    Maze tmp;
+    Status st;
+
+    if (path == NULL || out == NULL) {
+        return ST_BAD_INPUT;
+    }
+    st = util_read_file(path, &data, &len);
+    if (st != ST_OK) {
+        return st;
+    }
+    cur = data;
+    st = read_header(&cur, &h, &w);
+    if (st == ST_OK) {
+        st = load_rows(&cur, h, w, &rows);
+    }
+    if (st == ST_OK && !only_blank_lines(cur)) {
+        free_rows(rows, h);
+        st = ST_BAD_FORMAT;
+    }
     util_free(data);
+    if (st != ST_OK) {
+        return st;
+    }
+    st = build_maze(rows, h, w, &tmp);
+    if (st != ST_OK) {
+        return st;
+    }
     maze_destroy(out);
     *out = tmp;
     return ST_OK;

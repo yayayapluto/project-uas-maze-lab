@@ -183,12 +183,13 @@ static Status prim_push_neighbours(Maze *m, int **front, int *count, int *cap, i
             continue;
         }
         if (*count == *cap) {
-            int *tmp = (int *)util_realloc(*front, (size_t)(*cap) * 2 * sizeof(int));
+            int newcap = (*cap == 0) ? 8 : *cap * 2;
+            int *tmp = (int *)util_realloc(*front, (size_t)newcap * sizeof(int));
             if (tmp == NULL) {
                 return ST_NO_MEMORY;
             }
             *front = tmp;
-            *cap = *cap * 2;
+            *cap = newcap;
         }
         (*front)[(*count)++] = nr * m->w + nc;
     }

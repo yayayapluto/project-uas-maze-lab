@@ -128,30 +128,14 @@ static Status bfs_rebuild(const Maze *m, const int *parent, MazeCell **path, int
     return ST_OK;
 }
 
-/* Mencari jalur terpendek dengan BFS dan mengisi hasil solver. */
-Status maze_solve_bfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
+/* Menjalankan eksplorasi BFS dan mengisi antrean, parent, serta jumlah sel dikeluarkan. */
+static int bfs_explore(const Maze *m, int *queue, int *parent, int *visited)
 {
-    int *queue;
-    int *parent;
     int head = 0;
     int tail = 0;
-    int visited = 0;
-    int start;
-    Status st;
+    int start = m->start.r * m->w + m->start.c;
+    int count = 0;
 
-    if (m == NULL || res == NULL || path == NULL || m->grid == NULL) {
-        return ST_BAD_INPUT;
-    }
-    reset_result(res, path);
-    queue = (int *)util_malloc((size_t)(m->h * m->w) * sizeof(int));
-    parent = (int *)util_malloc((size_t)(m->h * m->w) * sizeof(int));
-    if (queue == NULL || parent == NULL) {
-        util_free(queue);
-        util_free(parent);
-        return ST_NO_MEMORY;
-    }
-    memset(parent, -1, (size_t)(m->h * m->w) * sizeof(int));
-    start = m->start.r * m->w + m->start.c;
     parent[start] = start;
     queue[tail++] = start;
     while (head < tail) {
@@ -159,7 +143,7 @@ Status maze_solve_bfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
         int r = idx / m->w;
         int c = idx % m->w;
         int d;
-        visited++;
+        count++;
         if (r == m->end.r && c == m->end.c) {
             break;
         }
@@ -178,17 +162,41 @@ Status maze_solve_bfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
             queue[tail++] = nidx;
         }
     }
+    *visited = count;
+    return count;
+}
+
+/* Mencari jalur terpendek dengan BFS dan mengisi hasil solver. */
+Status maze_solve_bfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
+{
+    int *queue;
+    int *parent;
+    int visited = 0;
+    Status st;
+
+    if (m == NULL || res == NULL || path == NULL || m->grid == NULL) {
+        return ST_BAD_INPUT;
+    }
+    reset_result(res, path);
+    queue = (int *)util_malloc((size_t)(m->h * m->w) * sizeof(int));
+    parent = (int *)util_malloc((size_t)(m->h * m->w) * sizeof(int));
+    if (queue == NULL || parent == NULL) {
+        util_free(queue);
+        util_free(parent);
+        return ST_NO_MEMORY;
+    }
+    memset(parent, -1, (size_t)(m->h * m->w) * sizeof(int));
+    bfs_explore(m, queue, parent, &visited);
     if (parent[m->end.r * m->w + m->end.c] != -1) {
         int length = 0;
         st = bfs_rebuild(m, parent, path, &length);
-        if (st == ST_OK) {
-            res->found = 1;
-            res->length = length;
-        } else {
+        if (st != ST_OK) {
             util_free(queue);
             util_free(parent);
             return st;
         }
+        res->found = 1;
+        res->length = length;
     }
     res->visited = visited;
     util_free(queue);
@@ -213,17 +221,55 @@ static int wall_choose_dir(const Maze *m, int r, int c, int dir)
     return -1;
 }
 
+/* Hasil perjalanan wall follower. */
+typedef struct {
+    int steps;
+    int visited;
+    int found;
+} WallWalk;
+
 /* Mengikuti dinding kanan sampai mencapai E atau melewati batas langkah. */
+static void wall_walk(const Maze *m, char *seen, MazeCell *out, int limit, WallWalk *result)
+{
+    int r = m->start.r;
+    int c = m->start.c;
+    int dir = 1;
+
+    result->steps = 0;
+    result->visited = 1;
+    result->found = 0;
+    seen[r * m->w + c] = 1;
+    out[0].r = r;
+    out[0].c = c;
+    while (result->steps < limit) {
+        int d = wall_choose_dir(m, r, c, dir);
+        if (d < 0) {
+            break;
+        }
+        r += SOLVE_DR[d];
+        c += SOLVE_DC[d];
+        dir = d;
+        result->steps++;
+        out[result->steps].r = r;
+        out[result->steps].c = c;
+        if (!seen[r * m->w + c]) {
+            seen[r * m->w + c] = 1;
+            result->visited++;
+        }
+        if (r == m->end.r && c == m->end.c) {
+            result->found = 1;
+            break;
+        }
+    }
+}
+
+/* Mencari jalur dengan wall follower; jalur dilepas pemanggil dengan util_free. */
 Status maze_solve_wall(const Maze *m, MazeSolveResult *res, MazeCell **path)
 {
     int limit;
     char *seen;
     MazeCell *out;
-    int r;
-    int c;
-    int dir = 1;
-    int steps = 0;
-    int visited = 0;
+    WallWalk walk;
 
     if (m == NULL || res == NULL || path == NULL || m->grid == NULL) {
         return ST_BAD_INPUT;
@@ -237,35 +283,11 @@ Status maze_solve_wall(const Maze *m, MazeSolveResult *res, MazeCell **path)
         util_free(out);
         return ST_NO_MEMORY;
     }
-    r = m->start.r;
-    c = m->start.c;
-    seen[r * m->w + c] = 1;
-    visited = 1;
-    out[0].r = r;
-    out[0].c = c;
-    while (steps < limit) {
-        int d = wall_choose_dir(m, r, c, dir);
-        if (d < 0) {
-            break;
-        }
-        r += SOLVE_DR[d];
-        c += SOLVE_DC[d];
-        dir = d;
-        steps++;
-        out[steps].r = r;
-        out[steps].c = c;
-        if (!seen[r * m->w + c]) {
-            seen[r * m->w + c] = 1;
-            visited++;
-        }
-        if (r == m->end.r && c == m->end.c) {
-            res->found = 1;
-            break;
-        }
-    }
-    res->length = steps;
-    res->visited = visited;
-    if (!res->found) {
+    wall_walk(m, seen, out, limit, &walk);
+    res->found = walk.found;
+    res->length = walk.steps;
+    res->visited = walk.visited;
+    if (!walk.found) {
         util_free(out);
         *path = NULL;
         res->length = 0;

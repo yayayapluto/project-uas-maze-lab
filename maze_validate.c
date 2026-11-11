@@ -67,37 +67,46 @@ static int borders_are_walls(const Maze *m)
     return 1;
 }
 
-/* Memeriksa tepi, jumlah S dan E, keterjangkauan E, dan melaporkan sel terisolasi. */
-Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
+/* Menghitung jumlah titik awal S dan titik tujuan E. */
+static void count_markers(const Maze *m, int *n_s, int *n_e)
 {
-    char *seen;
-    int n_s = 0;
-    int n_e = 0;
-    int reachable;
-    int total;
-    int e_reachable;
     int r;
     int c;
-    Status st = ST_OK;
 
-    if (m == NULL || m->grid == NULL) {
-        if (msg != NULL && msg_size > 0) {
-            snprintf(msg, msg_size, "Labirin belum ada.");
-        }
-        return ST_BAD_FORMAT;
-    }
-    if (msg != NULL && msg_size > 0) {
-        msg[0] = '\0';
-    }
+    *n_s = 0;
+    *n_e = 0;
     for (r = 0; r < m->h; r++) {
         for (c = 0; c < m->w; c++) {
             if (m->grid[r][c] == 'S') {
-                n_s++;
+                (*n_s)++;
             } else if (m->grid[r][c] == 'E') {
-                n_e++;
+                (*n_e)++;
             }
         }
     }
+}
+
+/* Menjalankan flood fill dari S dan melaporkan keterjangkauan E. */
+static Status reachability(const Maze *m, int *reachable, int *e_reachable)
+{
+    char *seen = (char *)util_calloc((size_t)(m->h * m->w), sizeof(char));
+
+    if (seen == NULL) {
+        return ST_NO_MEMORY;
+    }
+    *reachable = flood(m, m->start.r, m->start.c, seen);
+    *e_reachable = seen[m->end.r * m->w + m->end.c];
+    util_free(seen);
+    return ST_OK;
+}
+
+/* Memeriksa bentuk labirin: tepi dinding, tepat satu S, dan tepat satu E. */
+static Status check_shape(const Maze *m, char *msg, size_t msg_size)
+{
+    int n_s = 0;
+    int n_e = 0;
+
+    count_markers(m, &n_s, &n_e);
     if (!borders_are_walls(m)) {
         snprintf(msg, msg_size, "Tepi labirin bukan seluruhnya dinding.");
         return ST_BAD_FORMAT;
@@ -110,13 +119,34 @@ Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
         snprintf(msg, msg_size, "Harus ada tepat satu titik tujuan E, ditemukan %d.", n_e);
         return ST_BAD_FORMAT;
     }
-    seen = (char *)util_calloc((size_t)(m->h * m->w), sizeof(char));
-    if (seen == NULL) {
-        return ST_NO_MEMORY;
+    return ST_OK;
+}
+
+/* Memeriksa tepi, jumlah S dan E, keterjangkauan E, dan melaporkan sel terisolasi. */
+Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
+{
+    int reachable = 0;
+    int e_reachable = 0;
+    int total;
+    Status st;
+
+    if (m == NULL || m->grid == NULL) {
+        if (msg != NULL && msg_size > 0) {
+            snprintf(msg, msg_size, "Labirin belum ada.");
+        }
+        return ST_BAD_FORMAT;
     }
-    reachable = flood(m, m->start.r, m->start.c, seen);
-    e_reachable = seen[m->end.r * m->w + m->end.c];
-    util_free(seen);
+    if (msg != NULL && msg_size > 0) {
+        msg[0] = '\0';
+    }
+    st = check_shape(m, msg, msg_size);
+    if (st != ST_OK) {
+        return st;
+    }
+    st = reachability(m, &reachable, &e_reachable);
+    if (st != ST_OK) {
+        return st;
+    }
     total = count_walkable(m);
     if (isolated != NULL) {
         *isolated = total - reachable;
@@ -130,7 +160,7 @@ Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
     } else {
         snprintf(msg, msg_size, "Labirin valid tanpa sel terisolasi.");
     }
-    return st;
+    return ST_OK;
 }
 
 /* Menghitung sel jalan dengan tepat satu tetangga jalan; S dan E bukan kandidat. */

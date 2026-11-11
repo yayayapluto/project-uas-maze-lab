@@ -74,37 +74,10 @@ static void write_report(const MazeBenchRow *rows, int count, int n, int h, int 
 }
 
 /* Menjalankan submenu benchmark sampai pengguna memilih selesai. */
-void maze_menu_bench(void)
+static void bench_options(MazeBenchRow *rows, int count, int n, int h, int w, int loops)
 {
-    MazeBenchRow *rows = NULL;
-    int count = 0;
-    int n;
-    int seed;
-    int h;
-    int w;
-    int loops;
     int running = 1;
-    Status st;
 
-    if (util_read_int("Jumlah labirin (1-1000): ", 1, 1000, &n) != ST_OK) {
-        return;
-    }
-    if (util_read_int("Seed dasar (0-2147483647): ", 0, BENCH_SEED_MAX, &seed) != ST_OK) {
-        return;
-    }
-    if (!read_odd_dims(&h, &w)) {
-        return;
-    }
-    if (util_read_int("Loops (0-9999): ", 0, BENCH_LOOPS_MAX, &loops) != ST_OK) {
-        return;
-    }
-    st = maze_bench_run(n, (unsigned)seed, h, w, loops, &rows, &count);
-    if (st != ST_OK) {
-        printf("%s\n", util_status_message(st));
-        util_free(rows);
-        return;
-    }
-    maze_bench_summary(rows, count, n, h, w, loops);
     while (running) {
         int choice;
         printf("\n1. Urut sel dikunjungi\n");
@@ -133,5 +106,39 @@ void maze_menu_bench(void)
             break;
         }
     }
+}
+
+/* Menjalankan benchmark lengkap dengan ringkasan dan histogram. */
+void maze_menu_bench(void)
+{
+    MazeBenchRow *rows = NULL;
+    int count = 0;
+    int n;
+    int seed;
+    int h;
+    int w;
+    int loops;
+    Status st;
+
+    if (util_read_int("Jumlah labirin (1-1000): ", 1, 1000, &n) != ST_OK) {
+        return;
+    }
+    if (util_read_int("Seed dasar (0-2147483647): ", 0, BENCH_SEED_MAX, &seed) != ST_OK) {
+        return;
+    }
+    if (!read_odd_dims(&h, &w)) {
+        return;
+    }
+    if (util_read_int("Loops (0-9999): ", 0, BENCH_LOOPS_MAX, &loops) != ST_OK) {
+        return;
+    }
+    st = maze_bench_run(n, (unsigned)seed, h, w, loops, &rows, &count);
+    if (st != ST_OK) {
+        printf("%s\n", util_status_message(st));
+        util_free(rows);
+        return;
+    }
+    maze_bench_summary(rows, count, n, h, w, loops);
+    bench_options(rows, count, n, h, w, loops);
     util_free(rows);
 }

@@ -171,6 +171,22 @@ static void histogram_counts(const MazeBenchRow *rows, int count, int min_len, i
     }
 }
 
+/* Menulis satu kelas histogram beserta batang dan jumlahnya. */
+static Status report_class(BenchText *t, int low, int high, int count, int scale)
+{
+    int bars = count / scale;
+    int b;
+    Status st = bt_add(t, "[%3d - %3d] ", low, high);
+
+    for (b = 0; b < bars && st == ST_OK; b++) {
+        st = bt_add(t, "#");
+    }
+    if (st != ST_OK) {
+        return st;
+    }
+    return bt_add(t, " %d\n", count);
+}
+
 /* Menulis bagian histogram panjang jalur BFS. */
 static Status report_histogram(BenchText *t, const MazeBenchRow *rows, int count)
 {
@@ -202,27 +218,15 @@ static Status report_histogram(BenchText *t, const MazeBenchRow *rows, int count
         width = 1;
     }
     st = bt_add(t, "\nHistogram panjang jalur BFS\n");
-    for (k = 0; k < classes; k++) {
+    for (k = 0; k < classes && st == ST_OK; k++) {
         int low = min_len + k * width;
         int high = low + width - 1;
-        int bars = counts[k] / scale;
-        int b;
         if (k == classes - 1) {
             high = max_len;
         }
-        st = bt_add(t, "[%3d - %3d] ", low, high);
-        for (b = 0; b < bars; b++) {
-            st = bt_add(t, "#");
-            if (st != ST_OK) {
-                return st;
-            }
-        }
-        st = bt_add(t, " %d\n", counts[k]);
-        if (st != ST_OK) {
-            return st;
-        }
+        st = report_class(t, low, high, counts[k], scale);
     }
-    return ST_OK;
+    return st;
 }
 
 /* Menyusun teks laporan benchmark yang dipakai bersama layar dan berkas. */
