@@ -1,0 +1,12 @@
+Kecil;data/kecil.txt;6;7;1;7
+Putar;data/loop_putar.txt;8;9;2;6
+Tanpa Jalan;data/tanpa_jalan.txt;6;7;1;-1
+Terisolasi;data/terisolasi.txt;5;7;2;4
+Alpha;data/maze_a.txt;11;21;3;58
+beta;data/maze_b.txt;9;15;2;22
+Gamma;data/maze_c.txt;15;25;4;38
+Delta;data/maze_d.txt;7;9;1;10
+EPSILON;data/maze_e.txt;21;41;5;172
+Zeta;data/maze_f.txt;13;19;3;26
+eta;data/maze_g.txt;9;11;2;26
+Theta;data/maze_h.txt;5;5;1;4

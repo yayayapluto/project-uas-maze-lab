@@ -1,0 +1,9 @@
+Kecil;data/kecil.txt;6;7;1;7
+Putar;data/loop_putar.txt;8;9;2;6
+Tanpa Jalan;data/tanpa_jalan.txt;6;7;1;-1
+Terisolasi;data/terisolasi.txt;5;7;2;4
+Rusak Kolom;data/kecil.txt;6;7;1
+Rusak Angka;data/kecil.txt;6;7;x;7
+Rusak Ukuran;data/kecil.txt;99;7;1;7
+Rusak Kesulitan;data/kecil.txt;6;7;9;7
+NamaLabirinYangSangatPanjangSekali;data/kecil.txt;6;7;1;7
