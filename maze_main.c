@@ -1,11 +1,15 @@
 #include "maze_lab/maze_lab.h"
+#include "ui/ui.h"
 
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 
 /* Jalankan executable ini: tanpa argumen membuka menu, --test menjalankan semua uji. */
 int main(int argc, char **argv)
 {
+    setlocale(LC_ALL, "");
+    ui_init();
     if (argc == 2 && strcmp(argv[1], "--test") == 0) {
         return test_maze_lab();
     }

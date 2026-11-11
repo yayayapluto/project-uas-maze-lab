@@ -1,5 +1,7 @@
 #include "maze_lab.h"
 
+#include "../ui/ui.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -70,7 +72,22 @@ static void write_report(const MazeBenchRow *rows, int count, int n, int h, int 
         return;
     }
     st = maze_bench_write_report(path, rows, count, n, h, w, loops);
-    printf("%s\n", util_status_message(st));
+    ui_status(st);
+}
+
+/* Menjalankan submenu benchmark sampai pengguna memilih selesai. */
+static void print_bench_menu(void)
+{
+    static const char *const lines[] = {
+        "1. Urut sel dikunjungi",
+        "2. Urut panjang jalur",
+        "3. Cari seed",
+        "4. Tulis laporan",
+        "0. Selesai"
+    };
+
+    printf("\n");
+    ui_panel("BENCHMARK", lines, 5);
 }
 
 /* Menjalankan submenu benchmark sampai pengguna memilih selesai. */
@@ -80,11 +97,7 @@ static void bench_options(MazeBenchRow *rows, int count, int n, int h, int w, in
 
     while (running) {
         int choice;
-        printf("\n1. Urut sel dikunjungi\n");
-        printf("2. Urut panjang jalur\n");
-        printf("3. Cari seed\n");
-        printf("4. Tulis laporan\n");
-        printf("0. Selesai\n");
+        print_bench_menu();
         if (util_read_int("Pilihan: ", 0, 4, &choice) != ST_OK) {
             break;
         }
@@ -134,7 +147,7 @@ void maze_menu_bench(void)
     }
     st = maze_bench_run(n, (unsigned)seed, h, w, loops, &rows, &count);
     if (st != ST_OK) {
-        printf("%s\n", util_status_message(st));
+        ui_status(st);
         util_free(rows);
         return;
     }

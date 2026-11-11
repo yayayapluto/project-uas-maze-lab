@@ -1,5 +1,7 @@
 #include "maze_lab.h"
 
+#include "../ui/ui.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -27,17 +29,38 @@ static void ensure_loaded(MazeCatalog *cat, int *loaded)
 /* Tampilkan tabel semua entri katalog. */
 static void show_table(const MazeCatalog *cat)
 {
+    const char *headers[7] = {"No", "Nama", "File", "H", "W", "Diff", "Steps"};
+    const int widths[7] = {4, 20, 28, 5, 5, 5, 6};
+    const char **cells;
+    char (*num)[5][12];
     int i;
 
-    printf("%-4s %-20s %-28s %5s %5s %4s %6s\n", "No", "Nama", "File", "H", "W", "Diff", "Steps");
-    for (i = 0; i < cat->count; i++) {
-        const MazeInfo *it = &cat->items[i];
-        printf("%-4d %-20s %-28s %5d %5d %4d %6d\n", i + 1, it->name, it->file,
-               it->h, it->w, it->difficulty, it->best_steps);
-    }
     if (cat->count == 0) {
         printf("(katalog kosong)\n");
+        return;
     }
+    cells = (const char **)util_calloc((size_t)cat->count * 7, sizeof(char *));
+    num = (char (*)[5][12])util_malloc((size_t)cat->count * sizeof *num);
+    for (i = 0; i < cat->count; i++) {
+        const MazeInfo *it = &cat->items[i];
+        size_t base = (size_t)i * 7;
+
+        snprintf(num[i][0], sizeof num[i][0], "%d", i + 1);
+        snprintf(num[i][1], sizeof num[i][1], "%d", it->h);
+        snprintf(num[i][2], sizeof num[i][2], "%d", it->w);
+        snprintf(num[i][3], sizeof num[i][3], "%d", it->difficulty);
+        snprintf(num[i][4], sizeof num[i][4], "%d", it->best_steps);
+        cells[base + 0] = num[i][0];
+        cells[base + 1] = it->name;
+        cells[base + 2] = it->file;
+        cells[base + 3] = num[i][1];
+        cells[base + 4] = num[i][2];
+        cells[base + 5] = num[i][3];
+        cells[base + 6] = num[i][4];
+    }
+    ui_table(headers, widths, cells, cat->count, 7);
+    util_free(num);
+    util_free(cells);
 }
 
 /* Jalankan pencarian nama sesuai metode yang dipilih pengguna. */
@@ -102,7 +125,7 @@ static void add_entry(MazeCatalog *cat)
     memcpy(info.name, name, strlen(name) + 1);
     memcpy(info.file, file, strlen(file) + 1);
     st = maze_catalog_add(cat, &info);
-    printf("%s\n", util_status_message(st));
+    ui_status(st);
 }
 
 /* Buka file entri katalog sebagai labirin aktif. */
@@ -115,14 +138,13 @@ static void open_entry(const MazeCatalog *cat, Maze *active)
     if (cat->count == 0) {
         printf("Katalog kosong.\n");
         return;
-    }
-    if (util_read_int("Nomor entri: ", 1, cat->count, &index) != ST_OK) {
+    }    if (util_read_int("Nomor entri: ", 1, cat->count, &index) != ST_OK) {
         return;
     }
     memset(&loaded, 0, sizeof loaded);
     st = maze_load(cat->items[index - 1].file, &loaded);
     if (st != ST_OK) {
-        printf("%s\n", util_status_message(st));
+        ui_status(st);
         maze_destroy(&loaded);
         return;
     }
@@ -146,7 +168,27 @@ static void save_catalog(const MazeCatalog *cat)
         return;
     }
     st = maze_catalog_save(path, cat);
-    printf("%s\n", util_status_message(st));
+    ui_status(st);
+}
+
+/* Tampilkan submenu katalog sebagai panel. */
+static void print_catalog_menu(void)
+{
+    static const char *const lines[] = {
+        "1. Lihat tabel",
+        "2. Urut ukuran",
+        "3. Urut kesulitan",
+        "4. Urut nama",
+        "5. Cari sequential",
+        "6. Cari binary",
+        "7. Tambah entri",
+        "8. Buka labirin",
+        "9. Simpan katalog",
+        "0. Kembali"
+    };
+
+    printf("\n");
+    ui_panel("KATALOG", lines, 10);
 }
 
 /* Jalankan submenu katalog sampai pengguna memilih kembali. */
@@ -155,17 +197,7 @@ void maze_menu_catalog(MazeCatalog *cat, int *loaded, Maze *active)
     ensure_loaded(cat, loaded);
     for (;;) {
         int choice;
-        printf("\n=== KATALOG ===\n");
-        printf("1. Lihat tabel\n");
-        printf("2. Urut ukuran\n");
-        printf("3. Urut kesulitan\n");
-        printf("4. Urut nama\n");
-        printf("5. Cari sequential\n");
-        printf("6. Cari binary\n");
-        printf("7. Tambah entri\n");
-        printf("8. Buka labirin\n");
-        printf("9. Simpan katalog\n");
-        printf("0. Kembali\n");
+        print_catalog_menu();
         if (util_read_int("Pilihan: ", 0, 9, &choice) != ST_OK) {
             return;
         }

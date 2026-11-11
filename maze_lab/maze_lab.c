@@ -3,6 +3,7 @@
 #include "../maze_editor/maze_editor.h"
 #include "../maze_gen/maze_gen.h"
 #include "../maze_solve/maze_solve.h"
+#include "../ui/ui.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -10,17 +11,21 @@
 #define MAZE_SEED_MAX 2147483647
 #define MAZE_LOOPS_MAX 9999
 
-/* Menampilkan menu utama Maze Lab. */
+/* Tampilkan menu utama Maze Lab sebagai panel. */
 static void print_main_menu(void)
 {
-    printf("\n=== MAZE LAB ===\n");
-    printf("1. Katalog (lihat, urutkan, cari, tambah, buka)\n");
-    printf("2. Generate labirin\n");
-    printf("3. Selesaikan labirin (DFS / BFS / wall follower)\n");
-    printf("4. Editor labirin\n");
-    printf("5. Benchmark algoritma\n");
-    printf("6. Simpan labirin aktif\n");
-    printf("0. Kembali\n");
+    static const char *const lines[] = {
+        "1. Katalog (lihat, urutkan, cari, tambah, buka)",
+        "2. Generate labirin",
+        "3. Selesaikan labirin (DFS / BFS / wall follower)",
+        "4. Editor labirin",
+        "5. Benchmark algoritma",
+        "6. Simpan labirin aktif",
+        "0. Keluar"
+    };
+
+    printf("\n");
+    ui_panel("MAZE LAB", lines, 7);
 }
 
 /* Baca dimensi ganjil antara 5 dan 61, ulang sampai input valid. */
@@ -65,7 +70,7 @@ static void menu_generate(Maze *active)
     st = (algo == 1) ? maze_gen_backtracker(&generated, h, w, (unsigned)seed, loops)
                      : maze_gen_prim(&generated, h, w, (unsigned)seed, loops);
     if (st != ST_OK) {
-        printf("%s\n", util_status_message(st));
+        ui_status(st);
         maze_destroy(&generated);
         return;
     }
@@ -95,7 +100,7 @@ static void solve_with(const Maze *active, const char *solver)
         st = maze_solve_wall(&copy, &res, &path);
     }
     if (st != ST_OK) {
-        printf("%s\n", util_status_message(st));
+        ui_status(st);
         util_free(path);
         maze_destroy(&copy);
         return;
@@ -107,6 +112,50 @@ static void solve_with(const Maze *active, const char *solver)
     printf("%s: found=%d, length=%d, visited=%d\n", solver, res.found, res.length, res.visited);
     util_free(path);
     maze_destroy(&copy);
+}
+
+/* Kumpulkan hasil ketiga solver untuk tabel perbandingan. */
+static void compare_run(const Maze *active, MazeSolveResult *out)
+{
+    MazeCell *path = NULL;
+    int i;
+
+    memset(out, 0, 3 * sizeof *out);
+    for (i = 0; i < 3; i++) {
+        if (i == 0) {
+            maze_solve_dfs(active, &out[0], &path);
+        } else if (i == 1) {
+            maze_solve_bfs(active, &out[1], &path);
+        } else {
+            maze_solve_wall(active, &out[2], &path);
+        }
+        util_free(path);
+        path = NULL;
+    }
+}
+
+/* Tampilkan perbandingan ketiga solver sebagai tabel. */
+static void compare_table(const Maze *active, const char *const *solvers)
+{
+    const char *headers[4] = {"Solver", "Found", "Length", "Visited"};
+    const int widths[4] = {8, 6, 6, 8};
+    const char *cells[12];
+    char num[3][3][12];
+    MazeSolveResult res[3];
+    int i;
+
+    compare_run(active, res);
+    for (i = 0; i < 3; i++) {
+        cells[i * 4] = solvers[i];
+        snprintf(num[i][0], sizeof num[i][0], "%d", res[i].found);
+        snprintf(num[i][1], sizeof num[i][1], "%d", res[i].length);
+        snprintf(num[i][2], sizeof num[i][2], "%d", res[i].visited);
+        cells[i * 4 + 1] = num[i][0];
+        cells[i * 4 + 2] = num[i][1];
+        cells[i * 4 + 3] = num[i][2];
+    }
+    printf("\n");
+    ui_table(headers, widths, cells, 3, 4);
 }
 
 /* Jalankan menu solve: satu solver atau ketiganya sekaligus. */
@@ -131,19 +180,7 @@ static void menu_solve(const Maze *active)
             printf("\n--- %s ---\n", solvers[i]);
             solve_with(active, solvers[i]);
         }
-        printf("\n=== PERBANDINGAN SOLVER ===\n");
-        printf("%-8s %6s %6s %8s\n", "Solver", "Found", "Length", "Visited");
-        for (i = 0; i < 3; i++) {
-            MazeSolveResult res;
-            MazeCell *path = NULL;
-            Status st = (i == 0) ? maze_solve_dfs(active, &res, &path)
-                                 : (i == 1) ? maze_solve_bfs(active, &res, &path)
-                                            : maze_solve_wall(active, &res, &path);
-            if (st == ST_OK) {
-                printf("%-8s %6d %6d %8d\n", solvers[i], res.found, res.length, res.visited);
-            }
-            util_free(path);
-        }
+        compare_table(active, solvers);
         return;
     }
     solve_with(active, solvers[choice - 1]);
@@ -168,7 +205,7 @@ static void menu_save(const Maze *active)
         return;
     }
     st = maze_save(path, active);
-    printf("%s\n", util_status_message(st));
+    ui_status(st);
 }
 
 /* Menjalankan menu utama Maze Lab sampai pengguna memilih keluar. */
