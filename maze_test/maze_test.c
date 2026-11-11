@@ -14,7 +14,7 @@
 #define ISOLATED_MAZE "data/terisolasi.txt"
 #define TMP_MAZE "data/tmp_u01.txt"
 
-/* Menghitung jumlah sel jalan pada labirin. */
+/* Hitung jumlah sel jalan pada labirin. */
 static int count_walkable(const Maze *m)
 {
     int total = 0;
@@ -31,7 +31,7 @@ static int count_walkable(const Maze *m)
     return total;
 }
 
-/* Memeriksa dua labirin memiliki grid, titik awal, dan titik tujuan yang sama. */
+/* Pastikan dua labirin punya grid, titik awal, dan titik tujuan yang sama. */
 static int same_maze(const Maze *a, const Maze *b)
 {
     int r;
@@ -53,7 +53,7 @@ static int same_maze(const Maze *a, const Maze *b)
     return 1;
 }
 
-/* Memeriksa dua labirin memiliki grid yang sama persis. */
+/* Pastikan grid dua labirin sama persis. */
 static int same_grid(const Maze *a, const Maze *b)
 {
     int r;
@@ -69,7 +69,7 @@ static int same_grid(const Maze *a, const Maze *b)
     return 1;
 }
 
-/* U01: simpan lalu muat menghasilkan labirin yang identik. */
+/* U01: simpan lalu muat, hasilnya harus identik. */
 static int test_save_load(void)
 {
     Maze src;
@@ -81,7 +81,7 @@ static int test_save_load(void)
     memset(&src, 0, sizeof src);
     memset(&dst, 0, sizeof dst);
     st = maze_load(SMALL_MAZE, &src);
-    util_check(st == ST_OK, "U01 berkas contoh termuat");
+    util_check(st == ST_OK, "U01 file contoh termuat");
     st = maze_save(TMP_MAZE, &src);
     util_check(st == ST_OK, "U01 labirin tersimpan");
     st = maze_load(TMP_MAZE, &dst);
@@ -94,7 +94,7 @@ static int test_save_load(void)
     return ok;
 }
 
-/* U02: tujuh berkas rusak ditolak dengan ST_BAD_FORMAT. */
+/* U02: tujuh file rusak harus ditolak dengan ST_BAD_FORMAT. */
 static int test_broken_files(void)
 {
     static const char *files[7] = {
@@ -106,7 +106,7 @@ static int test_broken_files(void)
     int i;
     int ok;
 
-    util_test_begin("U02 Berkas rusak ditolak");
+    util_test_begin("U02 File rusak ditolak");
     for (i = 0; i < 7; i++) {
         memset(&m, 0, sizeof m);
         ok = (maze_load(files[i], &m) == ST_BAD_FORMAT);
@@ -116,7 +116,7 @@ static int test_broken_files(void)
     return util_test_end();
 }
 
-/* U03: seed sama menghasilkan grid identik untuk kedua algoritma. */
+/* U03: seed yang sama harus menghasilkan grid identik pada kedua algoritma. */
 static int test_same_seed(void)
 {
     Maze a;
@@ -136,7 +136,7 @@ static int test_same_seed(void)
     return util_test_end();
 }
 
-/* U04: labirin sempurna memiliki 2L-1 sel jalan dan semua sel terhubung. */
+/* U04: labirin sempurna punya 2L-1 sel jalan dan semuanya terhubung. */
 static int test_perfect_maze(void)
 {
     static const int sizes[3][2] = { { 5, 5 }, { 7, 9 }, { 11, 11 } };
@@ -168,7 +168,7 @@ static int test_perfect_maze(void)
     return util_test_end();
 }
 
-/* U05 dan U06: BFS menemukan jalur terpendek dan tidak lebih panjang dari DFS. */
+/* U05 dan U06: BFS harus menemukan jalur terpendek dan tidak lebih panjang dari DFS. */
 static int test_bfs_length(void)
 {
     Maze m;
@@ -194,7 +194,7 @@ static int test_bfs_length(void)
     return ok;
 }
 
-/* U07: ketiga solver gagal pada labirin tanpa jalur. */
+/* U07: ketiga solver harus gagal pada labirin tanpa jalur. */
 static int test_no_path(void)
 {
     Maze m;
@@ -221,7 +221,7 @@ static int test_no_path(void)
     return ok;
 }
 
-/* U08 dan U09: wall follower berhasil pada labirin sempurna dan gagal pada labirin putar. */
+/* U08 dan U09: wall follower sukses di labirin sempurna, gagal di labirin putar. */
 static int test_wall_follower(void)
 {
     Maze m;
@@ -251,7 +251,7 @@ static int test_wall_follower(void)
     return ok;
 }
 
-/* U10: validator melaporkan sel terisolasi dan titik tujuan tak terjangkau. */
+/* U10: validator melaporkan sel terisolasi dan E yang tidak terjangkau. */
 static int test_validator(void)
 {
     Maze m;
@@ -276,7 +276,7 @@ static int test_validator(void)
     return ok;
 }
 
-/* U11 dan U12: perintah editor, undo, dan penolakan perintah salah. */
+/* U11 dan U12: perintah editor, undo, dan penolakan perintah yang salah. */
 static int test_editor(void)
 {
     Maze m;
@@ -361,7 +361,7 @@ static int test_extra_core(void)
     return ok;
 }
 
-/* Menjalankan seluruh uji modul dasar. */
+/* Jalankan seluruh uji modul dasar. */
 int test_maze_lab(void)
 {
     int failed = 0;

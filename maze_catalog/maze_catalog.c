@@ -9,7 +9,7 @@
 #define CATALOG_MIN_DIM 5
 #define CATALOG_MAX_DIM 61
 
-/* Memisahkan satu baris katalog menjadi kolom; mengembalikan jumlah kolom. */
+/* Pecah satu baris katalog menjadi kolom; kembalikan jumlah kolomnya. */
 static int split_fields(char *line, char *fields[], int max)
 {
     int count = 0;
@@ -30,7 +30,7 @@ static int split_fields(char *line, char *fields[], int max)
     return count;
 }
 
-/* Mengurai bilangan bulat penuh dari satu kolom; gagal bila bukan angka utuh. */
+/* Parse satu kolom menjadi bilangan bulat; gagal kalau bukan angka utuh. */
 static int parse_int(const char *s, int *out)
 {
     char *end = NULL;
@@ -50,7 +50,7 @@ static int parse_int(const char *s, int *out)
     return 1;
 }
 
-/* Memeriksa satu baris katalog dan mengisi info bila sah. */
+/* Periksa satu baris katalog; kalau sah, isi struct info-nya. */
 static int parse_line(char *line, MazeInfo *info)
 {
     char *fields[CATALOG_FIELDS + 2];
@@ -96,7 +96,7 @@ static int parse_line(char *line, MazeInfo *info)
     return 1;
 }
 
-/* Memperbesar array entri katalog bila kapasitas penuh. */
+/* Perbesar array entri katalog kalau kapasitasnya sudah penuh. */
 static Status grow_catalog(MazeCatalog *cat)
 {
     int newcap = (cat->capacity == 0) ? 4 : cat->capacity * 2;
@@ -110,7 +110,7 @@ static Status grow_catalog(MazeCatalog *cat)
     return ST_OK;
 }
 
-/* Mengambil baris berikutnya dari buffer; mengembalikan 1 bila ada baris. */
+/* Ambil baris berikutnya dari buffer; kembalikan 1 kalau masih ada. */
 static int next_line(char **cur, char **line_out)
 {
     char *line = *cur;
@@ -130,7 +130,7 @@ static int next_line(char **cur, char **line_out)
     return 1;
 }
 
-/* Menambahkan satu entri ke array katalog dan memperbesar bila perlu. */
+/* Tambah satu entri ke array katalog, besarkan kapasitasnya kalau perlu. */
 static Status append_info(MazeCatalog *cat, const MazeInfo *info)
 {
     if (cat->count == cat->capacity) {
@@ -143,7 +143,7 @@ static Status append_info(MazeCatalog *cat, const MazeInfo *info)
     return ST_OK;
 }
 
-/* Memuat katalog dari berkas; baris rusak tidak menghentikan pemuatan. */
+/* Muat katalog dari file; baris yang rusak hanya dihitung, pemuatan tetap jalan. */
 Status maze_catalog_load(const char *path, MazeCatalog *cat, int *bad_lines)
 {
     char *data = NULL;
@@ -185,7 +185,7 @@ Status maze_catalog_load(const char *path, MazeCatalog *cat, int *bad_lines)
     return ST_OK;
 }
 
-/* Menyimpan katalog ke berkas teks. */
+/* Simpan katalog ke file teks. */
 Status maze_catalog_save(const char *path, const MazeCatalog *cat)
 {
     char *text;
@@ -217,7 +217,7 @@ Status maze_catalog_save(const char *path, const MazeCatalog *cat)
     return st;
 }
 
-/* Menambah satu entri ke katalog dan menandai katalog belum terurut nama. */
+/* Tambah satu entri ke katalog; urutan nama otomatis jadi tidak sah lagi. */
 Status maze_catalog_add(MazeCatalog *cat, const MazeInfo *info)
 {
     if (cat == NULL || info == NULL) {
@@ -244,7 +244,7 @@ Status maze_catalog_add(MazeCatalog *cat, const MazeInfo *info)
     return ST_OK;
 }
 
-/* Mengurutkan katalog menurut jumlah sel dengan Bubble Sort. */
+/* Urutkan katalog berdasarkan ukuran sel dengan Bubble Sort. */
 void maze_catalog_sort_by_size(MazeCatalog *cat)
 {
     int i;
@@ -267,7 +267,7 @@ void maze_catalog_sort_by_size(MazeCatalog *cat)
     cat->sorted_by_name = 0;
 }
 
-/* Mengurutkan katalog menurut kesulitan dengan Selection Sort. */
+/* Urutkan katalog berdasarkan kesulitan dengan Selection Sort. */
 void maze_catalog_sort_by_difficulty(MazeCatalog *cat)
 {
     int i;
@@ -292,7 +292,7 @@ void maze_catalog_sort_by_difficulty(MazeCatalog *cat)
     cat->sorted_by_name = 0;
 }
 
-/* Mengurutkan katalog menurut nama dengan Selection Sort dan pembanding sama. */
+/* Urutkan katalog berdasarkan nama dengan Selection Sort. */
 void maze_catalog_sort_by_name(MazeCatalog *cat)
 {
     int i;
@@ -317,7 +317,7 @@ void maze_catalog_sort_by_name(MazeCatalog *cat)
     cat->sorted_by_name = 1;
 }
 
-/* Mencari nama secara sequential; mengembalikan indeks atau -1. */
+/* Cari nama secara sequential; kembalikan indeks atau -1. */
 int maze_catalog_find_name_seq(const MazeCatalog *cat, const char *name)
 {
     int i;
@@ -333,7 +333,7 @@ int maze_catalog_find_name_seq(const MazeCatalog *cat, const char *name)
     return -1;
 }
 
-/* Mencari nama secara binary; mengembalikan -2 bila katalog belum terurut nama. */
+/* Cari nama dengan binary search; kembalikan -2 kalau katalog belum diurutkan nama. */
 int maze_catalog_find_name_binary(const MazeCatalog *cat, const char *name)
 {
     int low = 0;
@@ -361,7 +361,7 @@ int maze_catalog_find_name_binary(const MazeCatalog *cat, const char *name)
     return -1;
 }
 
-/* Melepas seluruh isi katalog dan mengembalikan keadaan awal. */
+/* Lepas seluruh isi katalog dan kembalikan ke keadaan kosong. */
 void maze_catalog_free(MazeCatalog *cat)
 {
     if (cat == NULL) {

@@ -23,7 +23,7 @@ typedef struct {
     int capacity;
 } MazeUndoStack;
 
-/* Menjalankan sesi editor; slot menunjuk ke variabel labirin aktif pemanggil. */
+/* Jalankan sesi editor; slot menunjuk ke variabel labirin aktif milik pemanggil. */
 Status maze_run_editor(Maze *slot);
 
 /* Menjalankan satu baris perintah editor dan menulis pesan hasilnya pada out. */

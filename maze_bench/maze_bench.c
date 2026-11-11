@@ -12,7 +12,7 @@
 static const char *const BENCH_GEN[BENCH_COMBOS / 2] = { "backtracker", "prim" };
 static const char *const BENCH_SOLVER[3] = { "dfs", "bfs", "wall" };
 
-/* Menjalankan satu solver dan mengisi baris benchmark yang sesuai. */
+/* Jalankan satu solver dan isi baris benchmark-nya. */
 static Status run_solver(const Maze *m, const char *solver, MazeBenchRow *row)
 {
     MazeSolveResult res;
@@ -37,7 +37,7 @@ static Status run_solver(const Maze *m, const char *solver, MazeBenchRow *row)
     return ST_OK;
 }
 
-/* Menjalankan satu labirin untuk satu generator dan ketiga solver. */
+/* Uji satu labirin dengan satu generator dan ketiga solver. */
 static Status run_maze(MazeBenchRow *rows, int *filled, unsigned seed, int gen_idx,
                        int h, int w, int loops)
 {
@@ -69,7 +69,7 @@ static Status run_maze(MazeBenchRow *rows, int *filled, unsigned seed, int gen_i
     return ST_OK;
 }
 
-/* Menjalankan benchmark untuk n seed berurutan dan dua generator. */
+/* Jalankan benchmark: n seed berurutan, dua generator. */
 Status maze_bench_run(int n, unsigned base_seed, int h, int w, int loops,
                       MazeBenchRow **rows, int *count)
 {
@@ -108,7 +108,7 @@ Status maze_bench_run(int n, unsigned base_seed, int h, int w, int loops,
     return ST_OK;
 }
 
-/* Mengurutkan baris menurut sel dikunjungi dengan Bubble Sort. */
+/* Sort baris berdasarkan sel dikunjungi, memakai Bubble Sort. */
 void maze_bench_sort_by_visited(MazeBenchRow *rows, int count)
 {
     int i;
@@ -128,7 +128,7 @@ void maze_bench_sort_by_visited(MazeBenchRow *rows, int count)
     }
 }
 
-/* Mengurutkan baris menurut panjang jalur dengan Selection Sort. */
+/* Sort baris berdasarkan panjang jalur, memakai Selection Sort. */
 void maze_bench_sort_by_length(MazeBenchRow *rows, int count)
 {
     int i;
@@ -152,7 +152,7 @@ void maze_bench_sort_by_length(MazeBenchRow *rows, int count)
     }
 }
 
-/* Mencari baris dengan seed tertentu secara sequential. */
+/* Cari baris dengan seed tertentu secara sequential. */
 int maze_bench_find_seed(const MazeBenchRow *rows, int count, unsigned seed)
 {
     int i;
@@ -168,7 +168,7 @@ int maze_bench_find_seed(const MazeBenchRow *rows, int count, unsigned seed)
     return -1;
 }
 
-/* Menghitung statistik satu kombinasi generator dan solver dari nama baris. */
+/* Hitung statistik satu kombinasi generator-solver dari baris-baris yang cocok. */
 Status maze_bench_stats(const MazeBenchRow *rows, int count, const char *gen,
                         const char *solver, MazeBenchStat *out)
 {

@@ -6,7 +6,7 @@
 static const int GEN_DR[4] = { -1, 0, 1, 0 };
 static const int GEN_DC[4] = { 0, 1, 0, -1 };
 
-/* Memeriksa ukuran generator: ganjil dan berada pada rentang 5 sampai 61. */
+/* Cek ukuran untuk generator: harus ganjil dan di rentang 5 sampai 61. */
 static Status check_dims(int h, int w)
 {
     if (h < 5 || h > 61 || w < 5 || w > 61) {
@@ -18,7 +18,7 @@ static Status check_dims(int h, int w)
     return ST_OK;
 }
 
-/* Memperbesar array kandidat dinding; mengembalikan NULL bila alokasi gagal. */
+/* Perbesar array kandidat dinding; kembalikan NULL kalau alokasi gagal. */
 static int *grow_candidates(int **cand, int *cap)
 {
     int *tmp = (int *)util_realloc(*cand, (size_t)(*cap) * 2 * sizeof(int));
@@ -31,7 +31,7 @@ static int *grow_candidates(int **cand, int *cap)
     return tmp;
 }
 
-/* Mengumpulkan dinding interior yang diapit dua sel jalan sebagai kandidat loops. */
+/* Kumpulkan dinding interior yang diapit dua sel jalan sebagai kandidat loops. */
 static Status collect_candidates(const Maze *m, int **cand_out, int *count_out)
 {
     int *cand = (int *)util_malloc(8 * sizeof(int));
@@ -72,7 +72,7 @@ static Status collect_candidates(const Maze *m, int **cand_out, int *count_out)
     return ST_OK;
 }
 
-/* Membuka sejumlah dinding kandidat secara acak sehingga terbentuk jalur alternatif. */
+/* Buka sebagian dinding kandidat secara acak supaya ada jalur alternatif. */
 static Status open_loops(Maze *m, int loops)
 {
     int *cand = NULL;
@@ -100,7 +100,7 @@ static Status open_loops(Maze *m, int loops)
     return ST_OK;
 }
 
-/* Menandai titik awal dan titik tujuan pada sel logis sudut. */
+/* Tandai S dan E pada sel logis yang berada di sudut. */
 static void place_markers(Maze *m)
 {
     m->grid[1][1] = 'S';
@@ -111,7 +111,7 @@ static void place_markers(Maze *m)
     m->end.c = m->w - 2;
 }
 
-/* Mengacak urutan empat arah dengan Fisher-Yates. */
+/* Acak urutan empat arah dengan Fisher-Yates. */
 static void shuffle_dirs(int order[4])
 {
     int i;
@@ -128,7 +128,7 @@ static void shuffle_dirs(int order[4])
     }
 }
 
-/* Menggali sel logis dan seluruh dinding di thereof secara rekursif. */
+/* Gali sel logis dan dinding di tengahnya, secara rekursif. */
 static void bt_carve(Maze *m, char *vis, int r, int c)
 {
     int order[4];
@@ -152,7 +152,7 @@ static void bt_carve(Maze *m, char *vis, int r, int c)
     }
 }
 
-/* Menjalankan recursive backtracker pada labirin sementara. */
+/* Jalankan recursive backtracker pada labirin sementara. */
 static Status build_backtracker(Maze *m, unsigned seed)
 {
     char *vis = (char *)util_calloc((size_t)(m->h * m->w), sizeof(char));
@@ -168,7 +168,7 @@ static Status build_backtracker(Maze *m, unsigned seed)
     return st;
 }
 
-/* Menambahkan dinding frontier yang bertetangga dengan sel logis baru. */
+/* Tambahkan dinding frontier yang bertetangga dengan sel logis baru. */
 static Status prim_push_neighbours(Maze *m, int **front, int *count, int *cap, int r, int c)
 {
     int d;
@@ -196,7 +196,7 @@ static Status prim_push_neighbours(Maze *m, int **front, int *count, int *cap, i
     return ST_OK;
 }
 
-/* Menjalankan randomized Prim pada labirin sementara. */
+/* Jalankan randomized Prim pada labirin sementara. */
 static Status build_prim(Maze *m, unsigned seed)
 {
     char *vis = (char *)util_calloc((size_t)(m->h * m->w), sizeof(char));
@@ -246,7 +246,7 @@ static Status build_prim(Maze *m, unsigned seed)
     return st;
 }
 
-/* Membangkitkan labirin dengan algoritma yang dipilih dan memindahkannya ke out. */
+/* Bangkitkan labirin dengan algoritma pilihan, lalu pindahkan ke out. */
 static Status generate(Maze *out, int h, int w, unsigned seed, int loops, int use_prim)
 {
     Maze tmp;

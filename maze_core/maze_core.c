@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Mengambil satu baris dari buffer dan menggeser kursor ke baris berikutnya. */
+/* Ambil satu baris dari buffer, lalu geser kursor ke baris berikutnya. */
 static char *take_line(char **cur)
 {
     char *start = *cur;
@@ -25,7 +25,7 @@ static char *take_line(char **cur)
     return start;
 }
 
-/* Mengurai dua bilangan bulat dari satu baris; sisa baris harus kosong. */
+/* Parse dua bilangan bulat dari satu baris; sisanya harus kosong. */
 static Status parse_two_ints(const char *s, int *a, int *b)
 {
     char *end = NULL;
@@ -58,13 +58,13 @@ static Status parse_two_ints(const char *s, int *a, int *b)
     return ST_OK;
 }
 
-/* Menyatakan karakter sel merupakan karakter yang sah dalam berkas labirin. */
+/* Karakter yang boleh muncul di file labirin. */
 static int valid_cell_char(char ch)
 {
     return ch == '#' || ch == '.' || ch == 'S' || ch == 'E' || ch == '*';
 }
 
-/* Memeriksa seluruh sel tepi adalah dinding. */
+/* Cek apakah semua sel tepi berupa dinding. */
 static int border_ok(const char **rows, int h, int w)
 {
     int r;
@@ -83,7 +83,7 @@ static int border_ok(const char **rows, int h, int w)
     return 1;
 }
 
-/* Menghitung jumlah S dan E pada baris labirin. */
+/* Hitung jumlah S dan E di grid. */
 static void count_markers(const char **rows, int h, int w, int *n_s, int *n_e)
 {
     int r;
@@ -102,7 +102,7 @@ static void count_markers(const char **rows, int h, int w, int *n_s, int *n_e)
     }
 }
 
-/* Membuat labirin baru berukuran h x w dengan seluruh sel berisi dinding. */
+/* Buat labirin baru berukuran h x w, semua selnya dinding. */
 Status maze_create(Maze *m, int h, int w)
 {
     char **rows;
@@ -141,7 +141,7 @@ Status maze_create(Maze *m, int h, int w)
     return ST_OK;
 }
 
-/* Melepas tiap baris grid, lalu array baris, lalu mengosongkan labirin. */
+/* Lepas tiap baris grid, lalu array barisnya, lalu kosongkan struct labirin. */
 void maze_destroy(Maze *m)
 {
     int r;
@@ -164,7 +164,7 @@ void maze_destroy(Maze *m)
     m->end.c = 0;
 }
 
-/* Menyalin grid, titik awal, dan titik tujuan ke labirin tujuan. */
+/* Salin grid, titik awal, dan titik tujuan ke labirin tujuan. */
 Status maze_copy(const Maze *src, Maze *dst)
 {
     Maze tmp;
@@ -189,7 +189,7 @@ Status maze_copy(const Maze *src, Maze *dst)
     return ST_OK;
 }
 
-/* Menampilkan labirin ke layar, satu baris layar per baris grid. */
+/* Cetak labirin ke layar, satu baris layar per baris grid. */
 void maze_print(const Maze *m)
 {
     int r;
@@ -202,7 +202,7 @@ void maze_print(const Maze *m)
     }
 }
 
-/* Memuat labirin dari berkas; pemeriksaan menyalin baris yang sudah valid. */
+/* Muat labirin dari file; baris yang sudah valid disalin ke struct. */
 static Status load_rows(char **cur, int h, int w, char ***rows_out)
 {
     char **rows = (char **)util_calloc((size_t)h, sizeof(char *));
@@ -249,7 +249,7 @@ static Status load_rows(char **cur, int h, int w, char ***rows_out)
     return ST_OK;
 }
 
-/* Melepas array baris hasil pembacaan berkas. */
+/* Lepas array baris hasil pembacaan file. */
 static void free_rows(char **rows, int h)
 {
     int r;
@@ -260,7 +260,7 @@ static void free_rows(char **rows, int h)
     util_free(rows);
 }
 
-/* Membaca header dimensi dan memeriksa rentangnya. */
+/* Baca header dimensi dan pastikan rentangnya wajar. */
 static Status read_header(char **cur, int *h, int *w)
 {
     char *header = take_line(cur);
@@ -274,7 +274,7 @@ static Status read_header(char **cur, int *h, int *w)
     return ST_OK;
 }
 
-/* Menyatakan sisa isi berkas hanya berisi baris kosong. */
+/* Pastikan sisa file hanya berisi baris kosong. */
 static int only_blank_lines(char *cur)
 {
     for (;;) {
@@ -288,7 +288,7 @@ static int only_blank_lines(char *cur)
     }
 }
 
-/* Membangun labirin dari baris yang sudah valid dan melepas baris tersebut. */
+/* Bangun labirin dari baris-baris yang sudah valid, lalu lepas barisnya. */
 static Status build_maze(char **rows, int h, int w, Maze *out)
 {
     int n_s = 0;
@@ -327,7 +327,7 @@ static Status build_maze(char **rows, int h, int w, Maze *out)
     return ST_OK;
 }
 
-/* Memuat labirin dari berkas teks dan menggantinya hanya bila seluruhnya valid. */
+/* Muat labirin dari file teks; struct lama diganti hanya kalau seluruh isi valid. */
 Status maze_load(const char *path, Maze *out)
 {
     char *data = NULL;
@@ -368,7 +368,7 @@ Status maze_load(const char *path, Maze *out)
     return ST_OK;
 }
 
-/* Menyusun teks berkas labirin dan menulisnya ke disk. */
+/* Susun teks file labirin, lalu tulis ke disk. */
 Status maze_save(const char *path, const Maze *m)
 {
     char *text;

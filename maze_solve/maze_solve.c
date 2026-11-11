@@ -6,7 +6,7 @@
 static const int SOLVE_DR[4] = { -1, 0, 1, 0 };
 static const int SOLVE_DC[4] = { 0, 1, 0, -1 };
 
-/* Mengisi hasil solver dengan nilai awal dan menandai jalur kosong. */
+/* Isi hasil solver dengan nilai awal; jalur dianggap kosong. */
 static void reset_result(MazeSolveResult *res, MazeCell **path)
 {
     res->found = 0;
@@ -15,7 +15,7 @@ static void reset_result(MazeSolveResult *res, MazeCell **path)
     *path = NULL;
 }
 
-/* DFS rekursif: entering sel menandai kunjungan, jalur disusun saat rekursi kembali. */
+/* DFS rekursif: masuk ke sel berarti menandai kunjungan, jalur disusun saat rekursi kembali. */
 static int dfs_go(const Maze *m, int r, int c, char *seen, MazeCell *stack, int *sp, int *visited)
 {
     int d;
@@ -45,7 +45,7 @@ static int dfs_go(const Maze *m, int r, int c, char *seen, MazeCell *stack, int 
     return 0;
 }
 
-/* Menyalin stack DFS menjadi jalur keluaran; pemanggil melepas dengan util_free. */
+/* Salin stack DFS menjadi jalur keluaran; pemanggil yang melepas dengan util_free. */
 static Status dfs_emit(const MazeCell *stack, int len, MazeCell **path)
 {
     MazeCell *out = (MazeCell *)util_malloc((size_t)(len + 1) * sizeof(MazeCell));
@@ -58,7 +58,7 @@ static Status dfs_emit(const MazeCell *stack, int len, MazeCell **path)
     return ST_OK;
 }
 
-/* Mencari jalur dengan DFS rekursif dan mengisi hasil solver. */
+/* Cari jalur dengan DFS rekursif dan isi hasil solver. */
 Status maze_solve_dfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
 {
     char *seen;
@@ -94,7 +94,7 @@ Status maze_solve_dfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
     return ST_OK;
 }
 
-/* Merekonstruksi jalur dari E mundur mengikuti array parent. */
+/* Rekonstruksi jalur dari E mundur lewat array parent. */
 static Status bfs_rebuild(const Maze *m, const int *parent, MazeCell **path, int *length)
 {
     int idx = m->end.r * m->w + m->end.c;
@@ -128,7 +128,7 @@ static Status bfs_rebuild(const Maze *m, const int *parent, MazeCell **path, int
     return ST_OK;
 }
 
-/* Menjalankan eksplorasi BFS dan mengisi antrean, parent, serta jumlah sel dikeluarkan. */
+/* Jalankan eksplorasi BFS: isi antrean dan parent, lalu hitung sel yang dikeluarkan. */
 static int bfs_explore(const Maze *m, int *queue, int *parent, int *visited)
 {
     int head = 0;
@@ -166,7 +166,7 @@ static int bfs_explore(const Maze *m, int *queue, int *parent, int *visited)
     return count;
 }
 
-/* Mencari jalur terpendek dengan BFS dan mengisi hasil solver. */
+/* Cari jalur terpendek dengan BFS dan isi hasil solver. */
 Status maze_solve_bfs(const Maze *m, MazeSolveResult *res, MazeCell **path)
 {
     int *queue;
@@ -228,7 +228,7 @@ typedef struct {
     int found;
 } WallWalk;
 
-/* Mengikuti dinding kanan sampai mencapai E atau melewati batas langkah. */
+/* Ikuti dinding kanan sampai mencapai E atau melewati batas langkah. */
 static void wall_walk(const Maze *m, char *seen, MazeCell *out, int limit, WallWalk *result)
 {
     int r = m->start.r;
@@ -263,7 +263,7 @@ static void wall_walk(const Maze *m, char *seen, MazeCell *out, int limit, WallW
     }
 }
 
-/* Mencari jalur dengan wall follower; jalur dilepas pemanggil dengan util_free. */
+/* Cari jalur dengan wall follower; pemanggil yang melepas jalurnya dengan util_free. */
 Status maze_solve_wall(const Maze *m, MazeSolveResult *res, MazeCell **path)
 {
     int limit;
@@ -298,7 +298,7 @@ Status maze_solve_wall(const Maze *m, MazeSolveResult *res, MazeCell **path)
     return ST_OK;
 }
 
-/* Menandai jalur dengan '*' tanpa menimpa titik awal dan titik tujuan. */
+/* Tandai jalur dengan '*' tanpa menimpa S dan E. */
 void maze_draw_path(Maze *m, const MazeCell *path, int length)
 {
     int i;

@@ -9,7 +9,7 @@ static int walkable(char ch)
     return ch == '.' || ch == 'S' || ch == 'E' || ch == '*';
 }
 
-/* Flood fill rekursif dari (r, c) menandai sel terjangkau; mengembalikan jumlah sel baru. */
+/* Flood fill rekursif dari (r, c) untuk menandai sel yang terjangkau; kembalikan jumlah sel baru. */
 static int flood(const Maze *m, int r, int c, char *seen)
 {
     static const int dr[4] = { -1, 0, 1, 0 };
@@ -31,7 +31,7 @@ static int flood(const Maze *m, int r, int c, char *seen)
     return count;
 }
 
-/* Menghitung jumlah seluruh sel jalan dalam labirin. */
+/* Hitung jumlah semua sel jalan. */
 static int count_walkable(const Maze *m)
 {
     int total = 0;
@@ -48,7 +48,7 @@ static int count_walkable(const Maze *m)
     return total;
 }
 
-/* Memeriksa seluruh sel tepi adalah dinding. */
+/* Cek apakah semua sel tepi berupa dinding. */
 static int borders_are_walls(const Maze *m)
 {
     int r;
@@ -67,7 +67,7 @@ static int borders_are_walls(const Maze *m)
     return 1;
 }
 
-/* Menghitung jumlah titik awal S dan titik tujuan E. */
+/* Hitung jumlah S dan jumlah E. */
 static void count_markers(const Maze *m, int *n_s, int *n_e)
 {
     int r;
@@ -86,7 +86,7 @@ static void count_markers(const Maze *m, int *n_s, int *n_e)
     }
 }
 
-/* Menjalankan flood fill dari S dan melaporkan keterjangkauan E. */
+/* Flood fill dari S, lalu lihat apakah E terjangkau. */
 static Status reachability(const Maze *m, int *reachable, int *e_reachable)
 {
     char *seen = (char *)util_calloc((size_t)(m->h * m->w), sizeof(char));
@@ -100,7 +100,7 @@ static Status reachability(const Maze *m, int *reachable, int *e_reachable)
     return ST_OK;
 }
 
-/* Memeriksa bentuk labirin: tepi dinding, tepat satu S, dan tepat satu E. */
+/* Cek bentuk labirin: tepi dinding, tepat satu S, tepat satu E. */
 static Status check_shape(const Maze *m, char *msg, size_t msg_size)
 {
     int n_s = 0;
@@ -122,7 +122,7 @@ static Status check_shape(const Maze *m, char *msg, size_t msg_size)
     return ST_OK;
 }
 
-/* Memeriksa tepi, jumlah S dan E, keterjangkauan E, dan melaporkan sel terisolasi. */
+/* Validasi lengkap: tepi, jumlah S dan E, keterjangkauan E, lalu hitung sel terisolasi. */
 Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
 {
     int reachable = 0;
@@ -163,7 +163,7 @@ Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size)
     return ST_OK;
 }
 
-/* Menghitung sel jalan dengan tepat satu tetangga jalan; S dan E bukan kandidat. */
+/* Hitung sel jalan yang punya tepat satu tetangga jalan; S dan E dikecualikan. */
 int maze_count_dead_ends(const Maze *m)
 {
     static const int dr[4] = { -1, 0, 1, 0 };

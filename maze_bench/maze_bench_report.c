@@ -17,7 +17,7 @@ typedef struct {
 static const char *const REPORT_GEN[2] = { "backtracker", "prim" };
 static const char *const REPORT_SOLVER[3] = { "dfs", "bfs", "wall" };
 
-/* Menambahkan teks terformat ke buffer laporan dan memperbesar buffer bila perlu. */
+/* Tambahkan teks terformat ke buffer laporan; buffer diperbesar kalau tidak muat. */
 static Status bt_add(BenchText *t, const char *fmt, ...)
 {
     va_list ap;
@@ -58,13 +58,13 @@ static void bt_free(BenchText *t)
     t->cap = 0;
 }
 
-/* Menulis judul dan kepala tabel ringkasan. */
+/* Tulis judul dan kepala tabel ringkasan. */
 static Status report_head(BenchText *t, int n, int h, int w, int loops)
 {
     return bt_add(t, "=== RINGKASAN BENCHMARK (n=%d, ukuran %dx%d, loops=%d) ===\n", n, h, w, loops);
 }
 
-/* Menulis satu baris tabel untuk kombinasi generator dan solver. */
+/* Tulis satu baris tabel untuk satu kombinasi generator-solver. */
 static Status report_row(BenchText *t, const MazeBenchStat *st, const char *gen, const char *solver)
 {
     if (st->has_length) {
@@ -76,7 +76,7 @@ static Status report_row(BenchText *t, const MazeBenchStat *st, const char *gen,
                   gen, solver, st->tries, st->ok, "-", "-", "-", st->avg_visited, st->fail_pct);
 }
 
-/* Menulis seluruh baris tabel ringkasan berdasarkan nama generator dan solver. */
+/* Tulis semua baris ringkasan sesuai urutan generator dan solver. */
 static Status report_table(BenchText *t, const MazeBenchRow *rows, int count)
 {
     int g;
@@ -102,7 +102,7 @@ static Status report_table(BenchText *t, const MazeBenchRow *rows, int count)
     return ST_OK;
 }
 
-/* Menghitung rentang dan jumlah kelas histogram panjang jalur BFS. */
+/* Hitung rentang dan jumlah kelas histogram panjang jalur BFS. */
 static Status histogram_bounds(const MazeBenchRow *rows, int count, int *min_len,
                                 int *max_len, int *classes)
 {
@@ -137,7 +137,7 @@ static Status histogram_bounds(const MazeBenchRow *rows, int count, int *min_len
     return ST_OK;
 }
 
-/* Menghitung jumlah panjang jalur BFS per kelas histogram. */
+/* Hitung banyaknya panjang jalur BFS per kelas histogram. */
 static void histogram_counts(const MazeBenchRow *rows, int count, int min_len, int max_len,
                              int classes, int *counts)
 {
@@ -171,7 +171,7 @@ static void histogram_counts(const MazeBenchRow *rows, int count, int min_len, i
     }
 }
 
-/* Menulis satu kelas histogram beserta batang dan jumlahnya. */
+/* Tulis satu kelas histogram beserta batang dan jumlahnya. */
 static Status report_class(BenchText *t, int low, int high, int count, int scale)
 {
     int bars = count / scale;
@@ -187,7 +187,7 @@ static Status report_class(BenchText *t, int low, int high, int count, int scale
     return bt_add(t, " %d\n", count);
 }
 
-/* Menulis bagian histogram panjang jalur BFS. */
+/* Tulis bagian histogram panjang jalur BFS. */
 static Status report_histogram(BenchText *t, const MazeBenchRow *rows, int count)
 {
     int counts[REPORT_CLASSES];
@@ -229,7 +229,7 @@ static Status report_histogram(BenchText *t, const MazeBenchRow *rows, int count
     return st;
 }
 
-/* Menyusun teks laporan benchmark yang dipakai bersama layar dan berkas. */
+/* Susun teks laporan benchmark; teks ini dipakai baik untuk layar maupun file. */
 static Status build_report(const MazeBenchRow *rows, int count, int n, int h, int w,
                            int loops, char **out, size_t *out_len)
 {
@@ -253,7 +253,7 @@ static Status build_report(const MazeBenchRow *rows, int count, int n, int h, in
     return ST_OK;
 }
 
-/* Menampilkan ringkasan benchmark beserta histogram ke layar. */
+/* Tampilkan ringkasan benchmark beserta histogram ke layar. */
 void maze_bench_summary(const MazeBenchRow *rows, int count, int n, int h, int w, int loops)
 {
     char *text = NULL;
@@ -267,7 +267,7 @@ void maze_bench_summary(const MazeBenchRow *rows, int count, int n, int h, int w
     util_free(text);
 }
 
-/* Menulis laporan benchmark ke berkas teks dengan isi sama seperti ringkasan layar. */
+/* Tulis laporan benchmark ke file teks; isinya sama dengan ringkasan di layar. */
 Status maze_bench_write_report(const char *path, const MazeBenchRow *rows, int count,
                                 int n, int h, int w, int loops)
 {

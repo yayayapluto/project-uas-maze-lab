@@ -9,7 +9,7 @@
 #define EDITOR_MIN_DIM 5
 #define EDITOR_MAX_DIM 61
 
-/* Menulis pesan hasil perintah ke buffer keluaran dengan batas panjang. */
+/* Tulis pesan hasil perintah ke buffer keluaran, dengan batas panjang. */
 void maze_editor_say(char *out, size_t out_size, const char *text)
 {
     if (out == NULL || out_size == 0) {
@@ -18,7 +18,7 @@ void maze_editor_say(char *out, size_t out_size, const char *text)
     snprintf(out, out_size, "%s", text);
 }
 
-/* Mengurai bilangan bulat penuh; mengembalikan 0 bila bukan angka utuh. */
+/* Parse bilangan bulat penuh; kembalikan 0 kalau bukan angka utuh. */
 int maze_editor_parse_int(const char *s, int *out)
 {
     char *end = NULL;
@@ -38,7 +38,7 @@ int maze_editor_parse_int(const char *s, int *out)
     return 1;
 }
 
-/* Menambahkan satu entri ke stack undo; diam-diam dilewati bila alokasi gagal. */
+/* Push satu entri ke stack undo; kalau alokasi gagal, entri dilewati. */
 void maze_editor_undo_push(MazeUndoStack *st, int kind, int r, int c, char prev)
 {
     if (st->count == st->capacity) {
@@ -57,7 +57,7 @@ void maze_editor_undo_push(MazeUndoStack *st, int kind, int r, int c, char prev)
     st->count++;
 }
 
-/* Memeriksa koordinat berada di dalam labirin dan bukan sel tepi. */
+/* Pastikan koordinat ada di dalam labirin dan bukan sel tepi. */
 static int coord_ok(const Maze *m, int r, int c)
 {
     if (!maze_in_bounds(m, r, c)) {
@@ -69,7 +69,7 @@ static int coord_ok(const Maze *m, int r, int c)
     return 1;
 }
 
-/* Membuat labirin kosong dengan tepi dinding, bagian dalam jalan, serta penanda S dan E. */
+/* Buat labirin kosong: tepi dinding, bagian dalam jalan, plus penanda S dan E. */
 static Status make_blank(Maze *tmp, int h, int w)
 {
     int r;
@@ -93,7 +93,7 @@ static Status make_blank(Maze *tmp, int h, int w)
     return ST_OK;
 }
 
-/* Menjalankan perintah new h w dan menggantinya hanya bila berhasil. */
+/* Jalankan perintah new h w; struct lama diganti hanya kalau berhasil. */
 Status maze_editor_cmd_new(Maze *slot, MazeUndoStack *st, int h, int w, char *out, size_t out_size)
 {
     Maze tmp;
@@ -116,7 +116,7 @@ Status maze_editor_cmd_new(Maze *slot, MazeUndoStack *st, int h, int w, char *ou
     return ST_OK;
 }
 
-/* Menjalankan perintah wall dan open pada satu sel. */
+/* Jalankan perintah wall dan open pada satu sel. */
 Status maze_editor_cmd_cell(Maze *m, MazeUndoStack *st, int r, int c, int kind,
                             char *out, size_t out_size)
 {
@@ -142,7 +142,7 @@ Status maze_editor_cmd_cell(Maze *m, MazeUndoStack *st, int r, int c, int kind,
     return ST_OK;
 }
 
-/* Menjalankan perintah start dan end yang memindahkan penanda. */
+/* Jalankan perintah start dan end untuk memindahkan penanda. */
 Status maze_editor_cmd_marker(Maze *m, MazeUndoStack *st, int r, int c, int kind,
                                char *out, size_t out_size)
 {
@@ -179,7 +179,7 @@ Status maze_editor_cmd_marker(Maze *m, MazeUndoStack *st, int r, int c, int kind
     return ST_OK;
 }
 
-/* Membatalkan perintah ubah terakhir memakai stack undo. */
+/* Batalkan perubahan terakhir memakai stack undo. */
 Status maze_editor_cmd_undo(Maze *m, MazeUndoStack *st, char *out, size_t out_size)
 {
     MazeUndoEntry e;
@@ -204,7 +204,7 @@ Status maze_editor_cmd_undo(Maze *m, MazeUndoStack *st, char *out, size_t out_si
     return ST_OK;
 }
 
-/* Menampilkan labirin dengan penomoran baris dan kolom. */
+/* Cetak labirin dengan nomor baris dan kolom. */
 void maze_editor_cmd_show(const Maze *m)
 {
     int c;
@@ -224,7 +224,7 @@ void maze_editor_cmd_show(const Maze *m)
     }
 }
 
-/* Menjalankan perintah check: validasi lalu pencarian jalur terpendek. */
+/* Jalankan perintah check: validasi dulu, lalu cari jalur terpendek. */
 void maze_editor_cmd_check(const Maze *m, char *out, size_t out_size)
 {
     char msg[128];
@@ -256,7 +256,7 @@ void maze_editor_cmd_check(const Maze *m, char *out, size_t out_size)
     maze_editor_say(out, out_size, text);
 }
 
-/* Menyusun path berkas editor dari nama yang diketik pengguna. */
+/* Susun path file editor dari nama yang diketik pengguna. */
 static void build_path(char *buf, size_t size, const char *name)
 {
     size_t len = strlen(name);
@@ -268,7 +268,7 @@ static void build_path(char *buf, size_t size, const char *name)
     }
 }
 
-/* Menjalankan perintah save nama. */
+/* Jalankan perintah save nama. */
 Status maze_editor_cmd_save(const Maze *m, const char *name, char *out, size_t out_size)
 {
     char path[UTIL_MAX_PATH];
@@ -280,7 +280,7 @@ Status maze_editor_cmd_save(const Maze *m, const char *name, char *out, size_t o
     return st;
 }
 
-/* Menjalankan perintah load nama tanpa merusak labirin aktif bila gagal. */
+/* Jalankan perintah load nama tanpa merusak labirin aktif kalau gagal. */
 Status maze_editor_cmd_load(Maze *slot, MazeUndoStack *st, const char *name,
                              char *out, size_t out_size)
 {

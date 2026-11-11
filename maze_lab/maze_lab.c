@@ -23,7 +23,7 @@ static void print_main_menu(void)
     printf("0. Kembali\n");
 }
 
-/* Membaca dimensi ganjil antara 5 dan 61 sampai masukan valid. */
+/* Baca dimensi ganjil antara 5 dan 61, ulang sampai input valid. */
 static void read_odd_dims(int *h, int *w)
 {
     for (;;) {
@@ -40,7 +40,7 @@ static void read_odd_dims(int *h, int *w)
     }
 }
 
-/* Menjalankan menu generate: memilih algoritma, ukuran, seed, dan loops. */
+/* Jalankan menu generate: algoritma, ukuran, seed, lalu loops. */
 static void menu_generate(Maze *active)
 {
     int algo;
@@ -74,7 +74,7 @@ static void menu_generate(Maze *active)
     *active = generated;
 }
 
-/* Menjalankan satu solver pada salinan labirin dan menampilkan hasilnya. */
+/* Jalankan satu solver pada salinan labirin, lalu tampilkan hasilnya. */
 static void solve_with(const Maze *active, const char *solver)
 {
     Maze copy;
@@ -109,7 +109,7 @@ static void solve_with(const Maze *active, const char *solver)
     maze_destroy(&copy);
 }
 
-/* Menjalankan menu solve: satu solver atau ketiganya sekaligus. */
+/* Jalankan menu solve: satu solver atau ketiganya sekaligus. */
 static void menu_solve(const Maze *active)
 {
     int choice;
@@ -149,7 +149,7 @@ static void menu_solve(const Maze *active)
     solve_with(active, solvers[choice - 1]);
 }
 
-/* Menjalankan menu simpan labirin aktif ke path yang diketik pengguna. */
+/* Simpan labirin aktif ke path yang diketik pengguna. */
 static void menu_save(const Maze *active)
 {
     char path[UTIL_MAX_PATH];

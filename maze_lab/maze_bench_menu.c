@@ -6,7 +6,7 @@
 #define BENCH_SEED_MAX 2147483647
 #define BENCH_LOOPS_MAX 9999
 
-/* Membaca dimensi ganjil antara 5 dan 61 untuk benchmark. */
+/* Baca dimensi ganjil antara 5 dan 61 untuk benchmark. */
 static int read_odd_dims(int *h, int *w)
 {
     for (;;) {
@@ -23,21 +23,21 @@ static int read_odd_dims(int *h, int *w)
     }
 }
 
-/* Menjalankan urutan baris benchmark menurut sel dikunjungi. */
+/* Urutkan baris benchmark berdasarkan sel dikunjungi. */
 static void sort_by_visited(MazeBenchRow *rows, int count)
 {
     maze_bench_sort_by_visited(rows, count);
     printf("Baris diurutkan menurut sel dikunjungi.\n");
 }
 
-/* Menjalankan urutan baris benchmark menurut panjang jalur. */
+/* Urutkan baris benchmark berdasarkan panjang jalur. */
 static void sort_by_length(MazeBenchRow *rows, int count)
 {
     maze_bench_sort_by_length(rows, count);
     printf("Baris diurutkan menurut panjang jalur.\n");
 }
 
-/* Mencari baris benchmark dengan seed yang diketik pengguna. */
+/* Cari baris benchmark dengan seed yang diketik pengguna. */
 static void find_seed(const MazeBenchRow *rows, int count)
 {
     int seed;
@@ -55,7 +55,7 @@ static void find_seed(const MazeBenchRow *rows, int count)
            rows[idx].gen, rows[idx].solver);
 }
 
-/* Menulis laporan benchmark ke path yang diketik pengguna. */
+/* Tulis laporan benchmark ke path yang diketik pengguna. */
 static void write_report(const MazeBenchRow *rows, int count, int n, int h, int w, int loops)
 {
     char path[UTIL_MAX_PATH];
@@ -108,7 +108,7 @@ static void bench_options(MazeBenchRow *rows, int count, int n, int h, int w, in
     }
 }
 
-/* Menjalankan benchmark lengkap dengan ringkasan dan histogram. */
+/* Jalankan benchmark lengkap dengan ringkasan dan histogram. */
 void maze_menu_bench(void)
 {
     MazeBenchRow *rows = NULL;

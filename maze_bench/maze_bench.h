@@ -32,18 +32,18 @@ Status maze_bench_run(int n, unsigned base_seed, int h, int w, int loops,
 /* Menampilkan ringkasan benchmark beserta histogram panjang jalur BFS. */
 void maze_bench_summary(const MazeBenchRow *rows, int count, int n, int h, int w, int loops);
 
-/* Mengurutkan baris menurut sel dikunjungi dan menurut panjang jalur. */
+/* Sort baris berdasarkan sel dikunjungi atau panjang jalur. */
 void maze_bench_sort_by_visited(MazeBenchRow *rows, int count);
 void maze_bench_sort_by_length(MazeBenchRow *rows, int count);
 
-/* Mencari baris dengan seed tertentu secara sequential. */
+/* Cari baris dengan seed tertentu secara sequential. */
 int maze_bench_find_seed(const MazeBenchRow *rows, int count, unsigned seed);
 
-/* Menghitung statistik satu kombinasi generator dan solver. */
+/* Hitung statistik satu kombinasi generator-solver. */
 Status maze_bench_stats(const MazeBenchRow *rows, int count, const char *gen,
                         const char *solver, MazeBenchStat *out);
 
-/* Menulis laporan benchmark ke berkas; isi sama dengan ringkasan di layar. */
+/* Tulis laporan benchmark ke file; isinya sama dengan ringkasan di layar. */
 Status maze_bench_write_report(const char *path, const MazeBenchRow *rows, int count,
                                 int n, int h, int w, int loops);
 

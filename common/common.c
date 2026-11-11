@@ -12,7 +12,7 @@ static int g_fail_after = -1;
 static int g_checks_total = 0;
 static int g_checks_failed = 0;
 
-/* Menyatakan alokasi berikutnya harus gagal atau tidak. */
+/* Kalau bernilai 1, alokasi berikutnya dibuat gagal (injeksi kegagalan). */
 static int alloc_should_fail(void)
 {
     if (g_fail_after < 0) {
@@ -25,15 +25,15 @@ static int alloc_should_fail(void)
     return 1;
 }
 
-/* Mengembalikan pesan bahasa Indonesia untuk setiap status. */
+/* Pesan versi bahasa Indonesia untuk setiap status. */
 const char *util_status_message(Status s)
 {
     switch (s) {
     case ST_OK:            return "Berhasil.";
-    case ST_FILE_NOT_FOUND: return "Berkas tidak ditemukan.";
-    case ST_FILE_EMPTY:    return "Berkas kosong.";
-    case ST_FILE_WRITE:    return "Gagal menulis berkas.";
-    case ST_BAD_INPUT:     return "Masukan tidak valid.";
+    case ST_FILE_NOT_FOUND: return "File tidak ditemukan.";
+    case ST_FILE_EMPTY:    return "File kosong.";
+    case ST_FILE_WRITE:    return "Gagal menulis file.";
+    case ST_BAD_INPUT:     return "Input tidak valid.";
     case ST_BAD_FORMAT:    return "Format tidak sesuai.";
     case ST_OUT_OF_RANGE:  return "Nilai di luar rentang yang diperbolehkan.";
     case ST_NO_MEMORY:     return "Memori tidak cukup.";
@@ -41,7 +41,7 @@ const char *util_status_message(Status s)
     }
 }
 
-/* Membuang spasi di tepi string. */
+/* Buang spasi di awal dan akhir string. */
 void util_trim(char *s)
 {
     size_t start = 0;
@@ -63,7 +63,7 @@ void util_trim(char *s)
     s[end - start] = '\0';
 }
 
-/* Mengubah seluruh huruf besar menjadi huruf kecil. */
+/* Ubah semua huruf besar menjadi huruf kecil, langsung di string asal. */
 void util_to_lower(char *s)
 {
     size_t i;
@@ -76,7 +76,7 @@ void util_to_lower(char *s)
     }
 }
 
-/* Membandingkan dua string tanpa membedakan huruf besar dan kecil. */
+/* Bandingkan dua string tanpa peduli kapitalnya. */
 int util_stricmp(const char *a, const char *b)
 {
     size_t i = 0;
@@ -95,7 +95,7 @@ int util_stricmp(const char *a, const char *b)
     return (int)a[i] - (int)b[i];
 }
 
-/* Membaca satu baris; sisa baris terlalu panjang dibuang agar tidak tertinggal. */
+/* Baca satu baris input; kalau lebih panjang dari buffer, sisanya dibuang supaya tidak ikut ke baris berikutnya. */
 Status util_read_line(const char *prompt, char *buf, size_t size)
 {
     int ch;
@@ -120,7 +120,7 @@ Status util_read_line(const char *prompt, char *buf, size_t size)
     return ST_OK;
 }
 
-/* Membaca bilangan bulat dalam rentang, mengulang sampai valid atau EOF. */
+/* Baca satu bilangan bulat dalam rentang min-max; minta ulang sampai valid atau EOF. */
 Status util_read_int(const char *prompt, int min, int max, int *out)
 {
     char buf[UTIL_MAX_LINE];
@@ -142,11 +142,11 @@ Status util_read_int(const char *prompt, int min, int max, int *out)
         }
         value = strtol(buf, &end, 10);
         if (end == buf || *end != '\0') {
-            printf("Masukkan bilangan bulat yang valid.\n");
+            printf("Input harus berupa angka.\n");
             continue;
         }
         if (value < (long)min || value > (long)max) {
-            printf("Nilai harus antara %d dan %d.\n", min, max);
+            printf("Angkanya harus antara %d dan %d.\n", min, max);
             continue;
         }
         *out = (int)value;
@@ -154,7 +154,7 @@ Status util_read_int(const char *prompt, int min, int max, int *out)
     }
 }
 
-/* Alokasi satu blok dan mencatatnya pada pelacak alokasi. */
+/* Alokasi satu blok memori, dicatat di pelacak agar kebocoran bisa diperiksa. */
 void *util_malloc(size_t n)
 {
     void *p;
@@ -169,7 +169,7 @@ void *util_malloc(size_t n)
     return p;
 }
 
-/* Alokasi banyak elemen dan menginisialisasinya dengan nol. */
+/* calloc versi sendiri: alokasi banyak elemen sekaligus diisi nol. */
 void *util_calloc(size_t n, size_t size)
 {
     void *p;
@@ -184,7 +184,7 @@ void *util_calloc(size_t n, size_t size)
     return p;
 }
 
-/* Mengubah ukuran blok; bila p NULL hasilnya sama dengan alokasi baru. */
+/* realloc versi sendiri; kalau p NULL, perilakunya sama dengan alokasi baru. */
 void *util_realloc(void *p, size_t n)
 {
     void *r;
@@ -202,7 +202,7 @@ void *util_realloc(void *p, size_t n)
     return r;
 }
 
-/* Melepas blok memori; p NULL aman dan tidak dihitung. */
+/* free versi sendiri; p NULL diabaikan dan tidak dihitung. */
 void util_free(void *p)
 {
     if (p == NULL) {
@@ -212,19 +212,19 @@ void util_free(void *p)
     g_free_count++;
 }
 
-/* Selisih jumlah alokasi berhasil dan jumlah pelepasan. */
+/* Selisih jumlah alokasi dan jumlah free; harus nol bila tidak ada kebocoran. */
 int util_alloc_balance(void)
 {
     return (int)(g_alloc_count - g_free_count);
 }
 
-/* Mengatur injeksi kegagalan alokasi; nilai negatif mematikan injeksi. */
+/* Set injeksi kegagalan: k alokasi berikutnya berhasil, setelah itu semuanya gagal. Nilai negatif mematikan injeksi. */
 void util_fail_alloc_after(int k)
 {
     g_fail_after = k;
 }
 
-/* Membaca seluruh isi berkas teks ke buffer yang diakhiri NUL. */
+/* Baca seluruh isi file teks ke buffer yang diakhiri NUL. */
 Status util_read_file(const char *path, char **out, size_t *len)
 {
     FILE *f;
@@ -262,7 +262,7 @@ Status util_read_file(const char *path, char **out, size_t *len)
     return ST_OK;
 }
 
-/* Menulis data mentah ke berkas teks. */
+/* Tulis data mentah ke file teks. */
 Status util_write_file(const char *path, const char *data, size_t len)
 {
     FILE *f;
@@ -286,7 +286,7 @@ Status util_write_file(const char *path, const char *data, size_t len)
     return ST_OK;
 }
 
-/* Memulai kelompok uji baru dan mereset hitungan. */
+/* Mulai satu kelompok uji dan reset hitungan. */
 void util_test_begin(const char *name)
 {
     g_checks_total = 0;
@@ -294,7 +294,7 @@ void util_test_begin(const char *name)
     printf("\n=== %s ===\n", (name != NULL) ? name : "Uji");
 }
 
-/* Mencatat satu pemeriksaan dan incremented jumlah kegagalan bila gagal. */
+/* Catat satu pemeriksaan; kalau gagal, naikkan hitungan kegagalan. */
 void util_check(int cond, const char *desc)
 {
     g_checks_total++;
@@ -306,7 +306,7 @@ void util_check(int cond, const char *desc)
     }
 }
 
-/* Memeriksa nilai floating point dengan toleransi eps. */
+/* Cek dua nilai floating point dengan toleransi eps. */
 void util_check_double(double got, double want, double eps, const char *desc)
 {
     double diff = got - want;
@@ -316,7 +316,7 @@ void util_check_double(double got, double want, double eps, const char *desc)
     util_check(diff <= eps, desc);
 }
 
-/* Mencetak ringkasan kelompok uji dan mengembalikan jumlah kegagalan. */
+/* Cetak ringkasan kelompok uji dan kembalikan jumlah yang gagal. */
 int util_test_end(void)
 {
     printf("Ringkasan: %d pemeriksaan, %d gagal\n", g_checks_total, g_checks_failed);

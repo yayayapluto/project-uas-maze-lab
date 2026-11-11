@@ -12,7 +12,7 @@
 #define BROKEN_CATALOG "data/katalog_rusak.txt"
 #define EXPECTED_BAD_LINES 5
 
-/* Mengisi satu entri katalog uji. */
+/* Isi satu entri katalog untuk keperluan uji. */
 static void make_info(MazeInfo *info, const char *name, int h, int w, int difficulty, int best)
 {
     memset(info, 0, sizeof *info);
@@ -24,7 +24,7 @@ static void make_info(MazeInfo *info, const char *name, int h, int w, int diffic
     info->best_steps = best;
 }
 
-/* U13: pengurutan katalog menurut ukuran, kesulitan, dan nama. */
+/* U13: urutkan katalog berdasarkan ukuran, kesulitan, dan nama. */
 static int test_catalog_sort(void)
 {
     MazeCatalog cat;
@@ -82,7 +82,7 @@ static int test_catalog_search(void)
     return util_test_end();
 }
 
-/* U15: baris rusak pada katalog dilaporkan dan tidak menghentikan pemuatan. */
+/* U15: baris rusak pada katalog dihitung, tapi pemuatan tetap jalan. */
 static int test_catalog_broken(void)
 {
     MazeCatalog cat;
@@ -100,7 +100,7 @@ static int test_catalog_broken(void)
     return util_test_end();
 }
 
-/* U16: jumlah baris benchmark sama dengan n dikali dua generator dikali tiga solver. */
+/* U16: jumlah baris benchmark harus n x 2 generator x 3 solver. */
 static int test_bench_count(void)
 {
     MazeBenchRow *rows = NULL;
@@ -117,7 +117,7 @@ static int test_bench_count(void)
     return util_test_end();
 }
 
-/* U17: statistik ringkasan cocok dengan hitungan manual baris benchmark. */
+/* U17: statistik ringkasan harus cocok dengan hitungan manual. */
 static int test_bench_stats(void)
 {
     MazeBenchRow *rows = NULL;
@@ -182,7 +182,7 @@ static int test_bench_seed(void)
     return util_test_end();
 }
 
-/* U19: kegagalan alokasi pada maze_create dan generator tidak menyisakan kebocoran. */
+/* U19: kegagalan alokasi di maze_create dan generator tidak boleh meninggalkan kebocoran. */
 static int test_alloc_failures(void)
 {
     Maze m;
@@ -216,7 +216,7 @@ static int test_alloc_failures(void)
     return util_test_end();
 }
 
-/* Kegagalan alokasi pada benchmark dan verifikasi berkas katalog contoh. */
+/* Kegagalan alokasi saat benchmark, plus verifikasi file katalog contoh. */
 static int test_bench_alloc_and_library(void)
 {
     MazeBenchRow *rows = NULL;
@@ -242,11 +242,11 @@ static int test_bench_alloc_and_library(void)
         MazeCell *path = NULL;
         memset(&m, 0, sizeof m);
         if (maze_load(cat.items[i].file, &m) != ST_OK) {
-            util_check(0, "berkas entri katalog termuat");
+            util_check(0, "file entri katalog termuat");
             maze_destroy(&m);
             continue;
         }
-        util_check(m.h == cat.items[i].h && m.w == cat.items[i].w, "ukuran entri sesuai berkas");
+        util_check(m.h == cat.items[i].h && m.w == cat.items[i].w, "ukuran entri sesuai file");
         maze_solve_bfs(&m, &res, &path);
         if (cat.items[i].best_steps == -1) {
             util_check(res.found == 0, "entri tanpa jalur sesuai");
@@ -262,7 +262,7 @@ static int test_bench_alloc_and_library(void)
     return ok;
 }
 
-/* Uji ketahanan muat berkas dengan akhir baris CRLF dan editor tanpa labirin aktif. */
+/* Uji ketahanan: muat file berakhiran CRLF, dan editor tanpa labirin aktif. */
 static int test_crlf_and_editor_states(void)
 {
     static const char content[] = "5 5\r\n#####\r\n#S..#\r\n#.#.#\r\n#..E#\r\n#####\r\n";
@@ -276,14 +276,14 @@ static int test_crlf_and_editor_states(void)
     util_test_begin("Uji ketahanan CRLF dan editor tanpa labirin");
     f = fopen(path, "wb");
     if (f == NULL) {
-        util_check(0, "berkas sementara CRLF dapat dibuat");
+        util_check(0, "file sementara CRLF dapat dibuat");
         return util_test_end();
     }
     fwrite(content, 1, sizeof content - 1, f);
     fclose(f);
     memset(&m, 0, sizeof m);
-    util_check(maze_load(path, &m) == ST_OK, "berkas CRLF termuat");
-    util_check(m.grid[1][1] == 'S' && m.grid[3][3] == 'E', "penanda S dan E pada berkas CRLF");
+    util_check(maze_load(path, &m) == ST_OK, "file CRLF termuat");
+    util_check(m.grid[1][1] == 'S' && m.grid[3][3] == 'E', "penanda S dan E pada file CRLF");
     maze_destroy(&m);
     remove(path);
     memset(&m, 0, sizeof m);
@@ -298,7 +298,7 @@ static int test_crlf_and_editor_states(void)
     return util_test_end();
 }
 
-/* Menjalankan kelompok uji katalog, benchmark, alokasi, dan data contoh. */
+/* Jalankan kelompok uji katalog, benchmark, alokasi, dan data contoh. */
 int maze_test_extra(void)
 {
     int failed = 0;

@@ -8,7 +8,7 @@
 
 #define EDITOR_MAX_ARGS 4
 
-/* Memisahkan baris perintah menjadi token dan mengembalikan jumlah token. */
+/* Pecah baris perintah menjadi token; kembalikan jumlah tokennya. */
 static int split_tokens(char *line, char *tokens[], int max)
 {
     int count = 0;
@@ -24,7 +24,7 @@ static int split_tokens(char *line, char *tokens[], int max)
     return count;
 }
 
-/* Menyatakan baris perintah berarti keluar dari editor. */
+/* Cek apakah baris perintahnya quit. */
 static int is_quit(const char *line)
 {
     char buf[UTIL_MAX_LINE];
@@ -43,7 +43,7 @@ static int is_quit(const char *line)
     return strcmp(tokens[0], "quit") == 0;
 }
 
-/* Melepas isi stack undo. */
+/* Lepas isi stack undo. */
 void maze_undo_stack_free(MazeUndoStack *st)
 {
     if (st == NULL) {
@@ -55,7 +55,7 @@ void maze_undo_stack_free(MazeUndoStack *st)
     st->capacity = 0;
 }
 
-/* Menjalankan perintah yang tidak memerlukan labirin aktif. */
+/* Perintah yang tetap bisa jalan tanpa labirin aktif. */
 static Status exec_without_maze(Maze *slot, MazeUndoStack *st, char **tokens, int count,
                                  char *out, size_t out_size)
 {
@@ -84,7 +84,7 @@ static Status exec_without_maze(Maze *slot, MazeUndoStack *st, char **tokens, in
     return ST_OK;
 }
 
-/* Menjalankan perintah yang mengubah isi labirin aktif. */
+/* Perintah yang mengubah labirin aktif. */
 static Status exec_with_maze(Maze *slot, MazeUndoStack *st, char **tokens, int count,
                              char *out, size_t out_size)
 {
@@ -136,7 +136,7 @@ static Status exec_with_maze(Maze *slot, MazeUndoStack *st, char **tokens, int c
     return ST_OK;
 }
 
-/* Menjalankan satu baris perintah editor dan menulis pesan hasilnya. */
+/* Jalankan satu baris perintah editor dan tulis hasilnya ke out. */
 Status maze_editor_exec(Maze *slot, MazeUndoStack *st, const char *line, char *out, size_t out_size)
 {
     char buf[UTIL_MAX_LINE];
@@ -179,7 +179,7 @@ Status maze_editor_exec(Maze *slot, MazeUndoStack *st, const char *line, char *o
     return exec_with_maze(slot, st, tokens, count, out, out_size);
 }
 
-/* Menjalankan sesi editor sampai perintah quit diterima. */
+/* Jalankan sesi editor sampai ada perintah quit. */
 Status maze_run_editor(Maze *slot)
 {
     MazeUndoStack st;

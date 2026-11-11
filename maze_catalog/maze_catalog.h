@@ -3,7 +3,7 @@
 
 #include "../maze_core/maze_core.h"
 
-/* Satu entri katalog: identitas labirin dan berkas tempatnya disimpan. */
+/* Satu entri katalog: identitas labirin dan file tempat ia disimpan. */
 typedef struct {
     char name[32];
     char file[UTIL_MAX_PATH];
@@ -13,7 +13,7 @@ typedef struct {
     int best_steps;
 } MazeInfo;
 
-/* Katalog labirin dengan array dinamis dan penanda urutan nama. */
+/* Katalog labirin: array dinamis plus penanda apakah sudah terurut nama. */
 typedef struct {
     MazeInfo *items;
     int count;
@@ -21,21 +21,21 @@ typedef struct {
     int sorted_by_name;
 } MazeCatalog;
 
-/* Memuat katalog dari berkas; baris rusak dihitung pada bad_lines. */
+/* Muat katalog dari file; baris yang rusak dihitung ke bad_lines. */
 Status maze_catalog_load(const char *path, MazeCatalog *cat, int *bad_lines);
 
-/* Menyimpan katalog ke berkas dengan format yang sama seperti berkas muat. */
+/* Simpan katalog ke file dengan format yang sama seperti saat dimuat. */
 Status maze_catalog_save(const char *path, const MazeCatalog *cat);
 
-/* Menambah satu entri ke katalog dan mengubah urutan nama menjadi belum terurut. */
+/* Tambah satu entri ke katalog; urutan namanya jadi tidak sah lagi. */
 Status maze_catalog_add(MazeCatalog *cat, const MazeInfo *info);
 
-/* Mengurutkan katalog menurut ukuran sel dan menurut kesulitan. */
+/* Urutkan katalog berdasarkan ukuran sel atau kesulitan. */
 void maze_catalog_sort_by_size(MazeCatalog *cat);
 void maze_catalog_sort_by_difficulty(MazeCatalog *cat);
 void maze_catalog_sort_by_name(MazeCatalog *cat);
 
-/* Mencari nama secara sequential dan binary; binary mengembalikan -2 bila belum terurut. */
+/* Cari nama secara sequential atau binary; binary mengembalikan -2 kalau belum terurut nama. */
 int maze_catalog_find_name_seq(const MazeCatalog *cat, const char *name);
 int maze_catalog_find_name_binary(const MazeCatalog *cat, const char *name);
 

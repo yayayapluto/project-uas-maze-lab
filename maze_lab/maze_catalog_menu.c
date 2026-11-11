@@ -5,7 +5,7 @@
 
 #define CATALOG_PATH "data/library.txt"
 
-/* Memuat katalog contoh saat submenu katalog pertama kali dibuka. */
+/* Muat katalog contoh saat submenu katalog dibuka pertama kali. */
 static void ensure_loaded(MazeCatalog *cat, int *loaded)
 {
     int bad = 0;
@@ -24,12 +24,12 @@ static void ensure_loaded(MazeCatalog *cat, int *loaded)
     printf("Katalog dimuat: %d entri, %d baris rusak.\n", cat->count, bad);
 }
 
-/* Menampilkan tabel seluruh entri katalog. */
+/* Tampilkan tabel semua entri katalog. */
 static void show_table(const MazeCatalog *cat)
 {
     int i;
 
-    printf("%-4s %-20s %-28s %5s %5s %4s %6s\n", "No", "Nama", "Berkas", "H", "W", "Kes", "Steps");
+    printf("%-4s %-20s %-28s %5s %5s %4s %6s\n", "No", "Nama", "File", "H", "W", "Diff", "Steps");
     for (i = 0; i < cat->count; i++) {
         const MazeInfo *it = &cat->items[i];
         printf("%-4d %-20s %-28s %5d %5d %4d %6d\n", i + 1, it->name, it->file,
@@ -40,7 +40,7 @@ static void show_table(const MazeCatalog *cat)
     }
 }
 
-/* Menjalankan pencarian nama dengan metode yang dipilih pengguna. */
+/* Jalankan pencarian nama sesuai metode yang dipilih pengguna. */
 static void find_name(const MazeCatalog *cat, int binary)
 {
     char name[UTIL_MAX_LINE];
@@ -62,7 +62,7 @@ static void find_name(const MazeCatalog *cat, int binary)
     printf("Ditemukan pada indeks %d: %s (%s)\n", idx + 1, cat->items[idx].name, cat->items[idx].file);
 }
 
-/* Menjalankan penambahan satu entri katalog. */
+/* Tambahkan satu entri katalog. */
 static void add_entry(MazeCatalog *cat)
 {
     MazeInfo info;
@@ -105,7 +105,7 @@ static void add_entry(MazeCatalog *cat)
     printf("%s\n", util_status_message(st));
 }
 
-/* Membuka berkas entri katalog sebagai labirin aktif. */
+/* Buka file entri katalog sebagai labirin aktif. */
 static void open_entry(const MazeCatalog *cat, Maze *active)
 {
     int index;
@@ -131,7 +131,7 @@ static void open_entry(const MazeCatalog *cat, Maze *active)
     printf("Labirin %s dimuat sebagai labirin aktif.\n", cat->items[index - 1].name);
 }
 
-/* Menyimpan katalog ke path yang diketik pengguna. */
+/* Simpan katalog ke path yang diketik pengguna. */
 static void save_catalog(const MazeCatalog *cat)
 {
     char path[UTIL_MAX_PATH];
@@ -149,7 +149,7 @@ static void save_catalog(const MazeCatalog *cat)
     printf("%s\n", util_status_message(st));
 }
 
-/* Menjalankan submenu katalog sampai pengguna memilih kembali. */
+/* Jalankan submenu katalog sampai pengguna memilih kembali. */
 void maze_menu_catalog(MazeCatalog *cat, int *loaded, Maze *active)
 {
     ensure_loaded(cat, loaded);

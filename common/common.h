@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-/* Status hasil operasi seragam untuk seluruh modul suite. */
+/* Status hasil operasi yang seragam untuk semua modul. */
 typedef enum {
     ST_OK = 0,
     ST_FILE_NOT_FOUND,
@@ -18,13 +18,13 @@ typedef enum {
 #define UTIL_MAX_LINE 256
 #define UTIL_MAX_PATH 260
 
-/* Pesan bahasa Indonesia untuk setiap status. Tidak pernah NULL. */
+/* Pesan status berbahasa Indonesia; tidak pernah NULL. */
 const char *util_status_message(Status s);
 
 /* Baca satu baris ke buf; membuang newline dan sisa baris terlalu panjang. */
 Status util_read_line(const char *prompt, char *buf, size_t size);
 
-/* Baca bilangan bulat dalam [min, max]; mengulang sampai valid atau EOF. */
+/* Baca bilangan bulat dalam [min, max]; minta ulang sampai valid atau EOF. */
 Status util_read_int(const char *prompt, int min, int max, int *out);
 
 /* Buang spasi di tepi string. */
@@ -33,22 +33,22 @@ void util_trim(char *s);
 /* Ubah huruf besar menjadi huruf kecil. */
 void util_to_lower(char *s);
 
-/* Bandingkan dua string tanpa membedakan huruf besar dan kecil. */
+/* Bandingkan dua string tanpa peduli kapitalnya. */
 int util_stricmp(const char *a, const char *b);
 
-/* Baca seluruh berkas teks; buffer dilepas pemanggil dengan util_free. */
+/* Baca seluruh isi file teks; buffer dilepas pemanggil dengan util_free. */
 Status util_read_file(const char *path, char **out, size_t *len);
 
-/* Tulis data mentah ke berkas teks. */
+/* Tulis data mentah ke file teks. */
 Status util_write_file(const char *path, const char *data, size_t len);
 
-/* Alokasi memori yang tercatat pelacak alokasi. */
+/* Alokasi memori yang tercatat di pelacak alokasi. */
 void *util_malloc(size_t n);
 void *util_calloc(size_t n, size_t size);
 void *util_realloc(void *p, size_t n);
 void util_free(void *p);
 
-/* Selisih jumlah alokasi berhasil dan jumlah pelepasan. */
+/* Selisih jumlah alokasi dan jumlah free; harus nol bila tidak ada kebocoran. */
 int util_alloc_balance(void);
 
 /* Injeksi kegagalan alokasi: k alokasi berikutnya berhasil, sisanya gagal. */

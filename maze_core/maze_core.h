@@ -25,7 +25,7 @@ typedef struct {
     int visited;
 } MazeSolveResult;
 
-/* Membuat labirin berukuran h x w berisi dinding; pemanggil melepas via maze_destroy. */
+/* Buat labirin berukuran h x w berisi dinding; pemanggil yang melepas via maze_destroy. */
 Status maze_create(Maze *m, int h, int w);
 
 /* Melepas seluruh isi labirin dan menjadikan labirin kosong; aman dipanggil dua kali. */
@@ -37,16 +37,16 @@ Status maze_copy(const Maze *src, Maze *dst);
 /* Menampilkan labirin ke layar. */
 void maze_print(const Maze *m);
 
-/* Memuat labirin dari berkas; isi lama out dilepas hanya bila pemuatan berhasil. */
+/* Muat labirin dari file; isi lama out dilepas hanya kalau pemuatan berhasil. */
 Status maze_load(const char *path, Maze *out);
 
-/* Menyimpan labirin ke berkas teks. */
+/* Simpan labirin ke file teks. */
 Status maze_save(const char *path, const Maze *m);
 
-/* Memeriksa labirin dan melaporkan jumlah sel jalan terisolasi pada msg. */
+/* Periksa labirin dan laporkan jumlah sel jalan terisolasi lewat msg. */
 Status maze_validate(const Maze *m, int *isolated, char *msg, size_t msg_size);
 
-/* Menghitung sel jalan dengan tepat satu tetangga jalan; S dan E tidak dihitung. */
+/* Hitung sel jalan yang punya tepat satu tetangga jalan; S dan E dikecualikan. */
 int maze_count_dead_ends(const Maze *m);
 
 /* Menyatakan koordinat berada di dalam grid. */
