@@ -7,3 +7,9 @@
 
 # Berkas sementara pengujian
 data/tmp_*
+
+# Konfigurasi agent lokal
+.opencode/
+docs/
+AGENTS.md
+prompt_04_maze_lab.md
